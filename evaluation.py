@@ -81,7 +81,8 @@ class Evaluation:
         csf_coefficients, csfs, CI_coefficients, _ = self.sCI.read_AMOLQC_csfs(
             f"{wavefunction_name}.wf", n_elec
         )
-        # sort CI coefficients from largest to smallest absolut value and respectively csfs and csf_coefficients
+        # sort CI coefficients from largest to smallest absolut value and
+        # respectively csfs and csf_coefficients
         CI_coefficients_abs = -np.abs(np.array(CI_coefficients))
         idx = CI_coefficients_abs.argsort()
 

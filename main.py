@@ -172,6 +172,7 @@ def main():
             final_ami,
             energy_ami=energy_ami,
         )
+
     elif data["WavefunctionOptions"]["wavefunctionOperation"] == "det2csf":
         csf_coefficients, csfs, CI_coefficients, wfpretext = (
             sCI.read_AMOLQC_csfs(f"{wavefunction_name}.wf", N)
