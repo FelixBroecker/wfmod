@@ -132,30 +132,56 @@ mpiexec -np {n_tasks} {path} {ami_name}.ami
 
         with cd(dir_name):
             cp(f"../{self.wavefunction_name}.wf", ".")
-            initial_determinant = self.sCI.build_energy_lowest_detetminant(
-                self.N
+
+            # get initial block
+            (
+                csf_coefficients,
+                csfs,
+                CI_coefficients,
+                wfpretext,
+            ) = self.sCI.read_AMOLQC_csfs(
+                f"{self.wavefunction_name}.wf", self.N, verbose=True
             )
-            self.sCI.get_initial_wf(
-                self.S,
-                self.M_s,
-                self.n_MO,
-                initial_determinant,
-                self.excitations,
-                self.orbital_symmetry,
-                self.point_group,
-                self.frozen_electrons,
-                self.frozen_MOs,
-                self.wavefunction_name,
-                split_at=self.blocksize,
-                sort_option=self.sort_option,
-                verbose=self.verbose,
-            )
+
+            if self.blocksize > 0:
+                # prints csfs inlcusive the indice of split at in first wf and residual in second
+                self.sCI.write_AMOLQC(
+                    csf_coefficients[: self.blocksize],
+                    csfs[: self.blocksize],
+                    CI_coefficients[: self.blocksize],
+                    pretext=wfpretext,
+                    file_name=f"{self.wavefunction_name}_out.wf",
+                )
+                self.sCI.write_AMOLQC(
+                    csf_coefficients[self.blocksize :],
+                    csfs[self.blocksize :],
+                    CI_coefficients[self.blocksize :],
+                    file_name=f"{self.wavefunction_name}_res.wf",
+                )
+                if self.verbose:
+                    print(
+                        f"number of csfs in wf 1: {len(csf_coefficients[:self.blocksize])}"
+                    )
+                    print(
+                        f"number of csfs in wf 2: {len(csf_coefficients[self.blocksize:])}"
+                    )
+                    print()
+                else:
+                    # write wavefunction in AMOLQC format
+                    self.sCI.write_AMOLQC(
+                        csf_coefficients,
+                        csfs,
+                        CI_coefficients,
+                        pretext=wfpretext,
+                        file_name=f"{self.wavefunction_name}_out.wf",
+                    )
             # extract total number of csfs
             rm(f"{self.wavefunction_name}.wf")
             mv(
                 f"{self.wavefunction_name}_out.wf",
                 f"{self.wavefunction_name}.wf",
             )
+
             cp(f"../{initial_ami}.ami", ".")
             # submit job
             self.print_job_file(
@@ -237,6 +263,7 @@ mpiexec -np {n_tasks} {path} {ami_name}.ami
                 print()
             n_block += 1
             dir_name = f"block{n_block}"
+            print(f"directory name: {dir_name}")
             mkdir(dir_name)
 
             # get wavefunctions from previous iterations
@@ -926,9 +953,9 @@ blockwise opimization is finished."
         )
         if self.threshold_type == "sum_up":
             n_blocks = max_blocks
-        flex = True
-        if flex:
-            n_blocks = max_blocks
+        # flex = True
+        # if flex:
+        #     n_blocks = max_blocks
 
         # n_blocks = math.ceil(174 / (self.blocksize - self.n_min))
         # blockwise iteration
