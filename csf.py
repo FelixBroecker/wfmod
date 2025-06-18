@@ -541,6 +541,9 @@ to parse CSF energy contributions."
             for i in range(-n_orbitals, n_orbitals + 1)
             if i not in det_ini and i != 0
         ]
+        # remove frozen MOs from virtuals
+        if frozen_MOs:
+            virtuals = [i for i in virtuals if i not in frozen_MOs]
 
         # consider symmetry if symmetry is specified in input
         consider_symmetry = bool(orbital_symmetry)
@@ -567,6 +570,10 @@ to parse CSF energy contributions."
                 for i in range(-n_orbitals, n_orbitals + 1)
                 if i not in det_reference and i != 0
             ]
+            if frozen_MOs:
+                virtuals_reference = [
+                    i for i in virtuals_reference if i not in frozen_MOs
+                ]
             for idx, i in enumerate(det_ini):
                 if i not in det_reference:
                     occ_mask[idx] = False
