@@ -314,9 +314,11 @@ to parse CSF energy contributions."
         if wf_type == "csf":
             for csf in wavefunction:
                 difference = 0
-                for electron in csf[0]:
-                    if electron not in reference_determinant:
-                        difference += 1
+                current = [abs(electron) for electron in csf[0]]
+                for electron in reference_determinant:
+                    if abs(electron) in current:
+                        current.remove(abs(electron))
+                difference = len(current)
                 excitation_type.append(difference)
         elif wf_type == "det":
             for det in wavefunction:
