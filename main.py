@@ -489,20 +489,24 @@ def main():
                 wavefunction_name = file.split(".")[0]
                 print(wavefunction_name)
 
-                degree_of_excitation, counter = (
-                    evaluation.get_excitations_degree(
-                        N,
-                        wavefunction_name,
-                        initial_determinant,
-                        wftype,
-                        max_degree=20,
-                        print_file=True,
-                        verbose=True,
+                try:
+                    degree_of_excitation, counter = (
+                        evaluation.get_excitations_degree(
+                            N,
+                            wavefunction_name,
+                            initial_determinant,
+                            wftype,
+                            max_degree=20,
+                            print_file=True,
+                            verbose=True,
+                        )
                     )
-                )
-                list_of_excitation_lists.append(degree_of_excitation)
-                list_of_counter_lists.append(counter)
-                list_of_wavefunction_names.append(wavefunction_name)
+                    list_of_excitation_lists.append(degree_of_excitation)
+                    list_of_counter_lists.append(counter)
+                    list_of_wavefunction_names.append(wavefunction_name)
+                except Exception as e:
+                    continue
+
         with open("eval/excitation.json", "w") as reffile:
             json.dump(
                 {
