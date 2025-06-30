@@ -45,6 +45,7 @@ def main():
             "wavefunctionName": "sCI",
             "wavefunctionOperation": "initial",
             "sort": "excitations",
+            "initialDeterminant": [],
             "excitations": [],
             "frozenElectrons": [],
             "frozenMOs": [],
@@ -93,6 +94,7 @@ def main():
     orbital_symmetry = data["MoleculeInformation"]["orbitalSymmetries"]
 
     wavefunction_name = data["WavefunctionOptions"]["wavefunctionName"]
+    initial_determinant = data["WavefunctionOptions"]["initialDeterminant"]
     excitations = data["WavefunctionOptions"]["excitations"]
     frozen_electrons = data["WavefunctionOptions"]["frozenElectrons"]
     frozen_MOs = data["WavefunctionOptions"]["frozenMOs"]
@@ -145,7 +147,8 @@ def main():
     # call demanded routine
 
     if data["WavefunctionOptions"]["wavefunctionOperation"] == "initial":
-        initial_determinant = sCI.build_energy_lowest_detetminant(N)
+        if not initial_determinant:
+            initial_determinant = sCI.build_energy_lowest_detetminant(N)
         sCI.get_initial_wf(
             S,
             M_s,
@@ -469,6 +472,8 @@ def main():
             csf_coefficients, csfs, range(len(csf_coefficients))
         )
         print(len(determinant_basis_csfs))
+    elif data["WavefunctionOptions"]["wavefunctionOperation"] == "eval":
+        evaluation.get_energy_course()
 
     if data["Output"]["plotCICoefficients"]:
         if data["Output"]["plotly"]:
