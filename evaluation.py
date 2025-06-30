@@ -2,6 +2,8 @@
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import numpy as np
+
+from pyscript import *  # requirement pyscript as python package https://github.com/Leonard-Reuter/pyscript
 from csf import SelectedCI
 
 
@@ -190,3 +192,72 @@ class Evaluation:
         fig.write_html(f"{wavefunction_name}.html")
 
         fig.show()
+
+    def return_last_energy_vlad(self, amo_file, verbose=True):
+        with open(amo_file, "r") as f:
+            for line in f:
+                # TODO get right energy
+                if "printing summary of optimizations" in line:
+                    line = f.readline()
+                    line = f.readline()
+                    # evalutate the energy of last optimization
+                    max_checks = 20
+                    not_found = True
+                    counter = 0
+                    while not_found:
+                        line_mem = line
+                        counter += 1
+                        line = f.readline()
+                        if line.strip() == "":
+                            not_found = False
+                        elif counter >= max_checks:
+                            exit(
+                                "Change number of checks in"
+                                "evaluation.py.return_last_energy_vlad."
+                            )
+                    # get energy and error from line_mem
+                    words = line_mem.split()
+                    energy = words[4].split("(")[0]
+                    error = words[4].split("(")[1].split(")")[0]
+                    if verbose:
+                        print()
+                        print(f"Energy: {energy} Eh, Error: {error} Eh")
+                    return energy, error
+
+    def get_energy_course(self, verbose=False):
+        output = []
+        for dir in dirs():
+            if dir.startswith("block"):
+                with cd(f"{dir}"):
+                    try:
+                        energy, error = self.return_last_energy_vlad(
+                            "iter.amo", verbose=verbose
+                        )
+                    except FileNotFoundError:
+                        try:
+                            energy, error = self.return_last_energy_vlad(
+                                "initial.amo", verbose=verbose
+                            )
+                        except FileNotFoundError:
+                            try:
+                                energy, error = self.return_last_energy_vlad(
+                                    "final.amo", verbose=verbose
+                                )
+                            except FileNotFoundError:
+                                if verbose:
+                                    print(f"No amo file found in {dir}.")
+                    output.append(f"  {dir:<13} {energy:>10} {error:>3}")
+
+        # sort blocks
+        max_num = len(output)
+        output.sort(
+            key=lambda x: float(
+                x.split()[0]
+                .replace("block", "")
+                .replace("_initial", "0")
+                .replace("_final", f"{max_num}")
+            )
+        )
+        for line in output:
+            print(line)
+        print()
