@@ -261,3 +261,52 @@ class Evaluation:
         for line in output:
             print(line)
         print()
+
+    def get_excitations_degree(
+        self,
+        N,
+        wavefunction_name,
+        initial_determinant,
+        wftype,
+        max_degree=20,
+        print_file=False,
+        verbose=False,
+    ):
+        """Determine degree of excitation per  in wavefunction"""
+        csf_coefficients, csfs, CI_coefficients, wfpretext = (
+            self.sCI.read_AMOLQC_csfs(f"{wavefunction_name}.wf", N)
+        )
+        # sort absolute CI coefficients in descending order
+        csf_coefficients, csfs, CI_coefficients = self.sCI.sort_lists_by_list(
+            [csf_coefficients, csfs, CI_coefficients],
+            CI_coefficients,
+            side=-1,
+            absol=True,
+        )
+
+        # determine degree of excitation
+        degree_of_excitation = self.sCI.determine_excitations(
+            csfs, initial_determinant, wf_type=wftype
+        )
+
+        # count total number of each degree of excitation
+        counter = [0 for i in range(max_degree)]
+
+        if print_file:
+            with open("excitation.out", "w") as reffile:
+                for i, item in enumerate(degree_of_excitation):
+                    counter[item] += 1
+                    reffile.write(f"{item}\n")
+
+        if verbose:
+            print()
+            print(
+                f"List of excitation degree per {wftype} in wavefunction sorted by CI coefficients:"
+            )
+            print(degree_of_excitation)
+            print()
+            print(
+                "List of number of excitations ([n_ground_state, n_singles, n_doubles, ...])."
+            )
+            print(counter)
+        return degree_of_excitation, counter
