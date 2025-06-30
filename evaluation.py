@@ -258,9 +258,11 @@ class Evaluation:
                 .replace("_final", f"{max_num}")
             )
         )
-        for line in output:
-            print(line)
-        print()
+        if verbose:
+            for line in output:
+                print(line)
+            print()
+        return output
 
     def get_excitations_degree(
         self,
