@@ -59,12 +59,13 @@ class AddSingles:
             res.append(alpha + beta)
         return res
 
-    def add_singles_det(
+    def add_singles(
         self,
         N,
         S,
         M_s,
         n_MO,
+        initial_determinant,
         orbital_symmetry,
         point_group,
         frozen_electrons,
@@ -75,7 +76,6 @@ class AddSingles:
 
         # build all single excitations with respect to
         # energy lowest determinant
-        initial_determinant = self.sCI.build_energy_lowest_detetminant(N)
         excited_determinants = self.sCI.get_excitations(
             n_MO,
             [1],
@@ -85,6 +85,7 @@ class AddSingles:
             core=frozen_electrons,
             frozen_MOs=frozen_MOs,
         )
+
         # sort determinants in Amolqc format
         temp = []
         for det in excited_determinants:
@@ -143,6 +144,18 @@ class AddSingles:
                 csf_coefficients, csfs
             )
             CI_coefficients = [1 if n == 0 else 0 for n in range(len(csfs))]
+
+            # sort csfs in excitation order
+            csf_coefficients, csfs, CI_coefficients = (
+                self.sCI.sort_order_of_csfs(
+                    csf_coefficients,
+                    csfs,
+                    CI_coefficients,
+                    "by_excitation",
+                    reference_determinant=initial_determinant,
+                )
+            )
+
             determinant_representation = csfs
 
         self.sCI.write_AMOLQC(
