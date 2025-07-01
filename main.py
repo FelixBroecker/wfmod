@@ -409,11 +409,12 @@ def main():
 
     elif data["WavefunctionOptions"]["wavefunctionOperation"] == "add_singles":
         aS = AddSingles()
-        aS.add_singles_det(
+        aS.add_singles(
             N,
             S,
             M_s,
             n_MO,
+            initial_determinant,
             orbital_symmetry,
             point_group,
             frozen_electrons,
