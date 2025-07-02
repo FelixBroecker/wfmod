@@ -72,6 +72,8 @@ class AddSingles:
         frozen_MOs,
         wavefunction_name,
         wftype,
+        wfpretext="",
+        verbose=True,
     ):
         """Add all single excitations to the wavefunction"""
         csf_coefficients = []
@@ -97,32 +99,59 @@ class AddSingles:
         print(
             f"Number of all singles in determinants: {len(excited_determinants)}"
         )
-        _, csfs_singles = self.sCI.get_unique_csfs(
-            excited_determinants.copy(), S, M_s
-        )
-        print(f"Number of all singles in csfs: {len(csfs_singles)}")
 
-        # read wavefunction
         if wftype == "csf":
+
+            # get single csfs from determinant basis
+            csf_coefficients_singles, csfs_singles = self.sCI.get_unique_csfs(
+                excited_determinants.copy(), S, M_s
+            )
+            csf_coefficients_singles, csfs_singles = (
+                self.sCI.sort_determinants_in_csfs(
+                    csf_coefficients_singles, csfs_singles
+                )
+            )
+            if verbose:
+                print(f"Number of all singles in csfs: {len(csfs_singles)}")
+
+            # read wave function
             csf_coefficients, csfs, CI_coefficients, wfpretext = (
                 self.sCI.read_AMOLQC_csfs(f"{wavefunction_name}.wf", N)
             )
+
             # remove singles from wave function
             degree_of_excitation = self.sCI.determine_excitations(
                 csfs, initial_determinant, wf_type=wftype
             )
             csfs = [
-                det
-                for det, degree in zip(det_basis, degree_of_excitation)
+                csf
+                for csf, degree in zip(csfs, degree_of_excitation)
+                if not degree == 1
+            ]
+            csf_coefficients = [
+                coeff
+                for coeff, degree in zip(
+                    csf_coefficients, degree_of_excitation
+                )
                 if not degree == 1
             ]
 
+            # add singles to csf basis
+            all_determinants = csfs[:1] + csfs_singles + csfs[1:]
+            csf_coefficients = (
+                csf_coefficients[:1]
+                + csf_coefficients_singles
+                + csf_coefficients[1:]
+            )
+
         elif wftype == "det":
+            # read wave function
             _, det_basis, CI_coefficients, wfpretext = (
                 self.sCI.read_AMOLQC_csfs(
                     f"{wavefunction_name}.wf", N, wftype="det"
                 )
             )
+
             # remove singles from wave function
             degree_of_excitation = self.sCI.determine_excitations(
                 det_basis, initial_determinant, wf_type=wftype
@@ -132,6 +161,8 @@ class AddSingles:
                 for det, degree in zip(det_basis, degree_of_excitation)
                 if not degree == 1
             ]
+
+            # add singles to determinant basis
             all_determinants = (
                 det_basis[:1] + excited_determinants + det_basis[1:]
             )
@@ -143,57 +174,6 @@ class AddSingles:
         self.sCI.write_AMOLQC(
             csf_coefficients,
             all_determinants,
-            CI_coefficients,
-            pretext=wfpretext,
-            file_name=f"{wavefunction_name}_add_sgls.wf",
-            wftype=wftype,
-        )
-        return None
-        # sort determinants in basis to amolqc format
-        # (sign changes can be ignored because coefficients are assigned
-        # later with guess)
-        temp = []
-        for det in det_basis:
-            _, det_tmp = self.sCI.sort_determinant(1, det)
-            temp.append(det_tmp)
-        det_basis = temp.copy()
-        all_determinants = det_basis + excited_determinants
-        all_determinants = self.sCI.spinfuncs.remove_duplicates(
-            all_determinants
-        )
-
-        CI_coefficients = [
-            1 if n == 0 else 0 for n in range(len(all_determinants))
-        ]
-        determinant_representation = all_determinants
-
-        csf_coefficients = []
-        # form csfs from determinant basis if required
-        if wftype == "csf":
-            csf_coefficients, csfs = self.sCI.get_unique_csfs(
-                all_determinants, S, M_s
-            )
-            csf_coefficients, csfs = self.sCI.sort_determinants_in_csfs(
-                csf_coefficients, csfs
-            )
-            CI_coefficients = [1 if n == 0 else 0 for n in range(len(csfs))]
-
-            # sort csfs in excitation order
-            csf_coefficients, csfs, CI_coefficients = (
-                self.sCI.sort_order_of_csfs(
-                    csf_coefficients,
-                    csfs,
-                    CI_coefficients,
-                    "by_excitation",
-                    reference_determinant=initial_determinant,
-                )
-            )
-
-            determinant_representation = csfs
-
-        self.sCI.write_AMOLQC(
-            csf_coefficients,
-            determinant_representation,
             CI_coefficients,
             pretext=wfpretext,
             file_name=f"{wavefunction_name}_add_sgls.wf",
