@@ -193,15 +193,17 @@ class Evaluation:
 
         fig.show()
 
-    def return_last_energy_vlad(self, amo_file, verbose=True):
+    def return_last_energy(self, amo_file, max_checks=20, verbose=False):
+        """Return last energy and error from amo file."""
+        energy = None
+        error = None
         with open(amo_file, "r") as f:
             for line in f:
-                # TODO get right energy
+                # new optimization output
                 if "printing summary of optimizations" in line:
                     line = f.readline()
                     line = f.readline()
                     # evalutate the energy of last optimization
-                    max_checks = 20
                     not_found = True
                     counter = 0
                     while not_found:
@@ -224,23 +226,50 @@ class Evaluation:
                         print(f"Energy: {energy} Eh, Error: {error} Eh")
                     return energy, error
 
+                # old optimization output
+                if "table of results:" in line:
+                    for _ in range(4):
+                        line = f.readline()
+                    not_found = True
+                    counter = 0
+                    while not_found:
+                        line_mem = line
+                        counter += 1
+                        line = f.readline()
+                        if "----" in line:
+                            not_found = False
+                        elif counter >= max_checks:
+                            exit(
+                                "Change number of checks in"
+                                "evaluation.py.return_last_energy."
+                            )
+                    # get energy and error from line_mem
+                    words = line_mem.split()
+                    energy = words[1]
+                    error = words[2]
+                    if verbose:
+                        print()
+                        print(f"Energy: {energy} Eh, Error: {error} Eh")
+        return energy, error
+
     def get_energy_course(self, verbose=False):
+        """Get energy course from all blocks in current directory."""
         output = []
         for dir in dirs():
             if dir.startswith("block"):
                 with cd(f"{dir}"):
                     try:
-                        energy, error = self.return_last_energy_vlad(
+                        energy, error = self.return_last_energy(
                             "iter.amo", verbose=verbose
                         )
                     except FileNotFoundError:
                         try:
-                            energy, error = self.return_last_energy_vlad(
+                            energy, error = self.return_last_energy(
                                 "initial.amo", verbose=verbose
                             )
                         except FileNotFoundError:
                             try:
-                                energy, error = self.return_last_energy_vlad(
+                                energy, error = self.return_last_energy(
                                     "final.amo", verbose=verbose
                                 )
                             except FileNotFoundError:
