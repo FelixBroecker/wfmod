@@ -177,7 +177,7 @@ def main():
             energy_ami=energy_ami,
         )
 
-    elif data["WavefunctionOptions"]["wavefunctionOperation"] == "det2csf":
+    elif data["WavefunctionOptions"]["wavefunctionOperation"] == "csf2det":
         csf_coefficients, csfs, CI_coefficients, wfpretext = (
             sCI.read_AMOLQC_csfs(f"{wavefunction_name}.wf", N)
         )
@@ -474,7 +474,7 @@ def main():
 
         # evaluate energy course during blockwise optimization
         energy_course_data = evaluation.get_energy_course()
-        with open("eval/energy_course.out", "w") as reffile:
+        with open("eval/energy_course.txt", "w") as reffile:
             for line in energy_course_data:
                 reffile.write(f"{line}\n")
 
@@ -488,7 +488,6 @@ def main():
             if file.endswith(".wf"):
                 # get wavefunction name
                 wavefunction_name = file.split(".")[0]
-                print(wavefunction_name)
 
                 try:
                     degree_of_excitation, counter = (
@@ -499,7 +498,7 @@ def main():
                             wftype,
                             max_degree=20,
                             print_file=True,
-                            verbose=True,
+                            verbose=False,
                         )
                     )
                     list_of_excitation_lists.append(degree_of_excitation)
