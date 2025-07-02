@@ -73,6 +73,8 @@ class AddSingles:
         wavefunction_name,
         wftype,
     ):
+        """Add all single excitations to the wavefunction"""
+        csf_coefficients = []
 
         # build all single excitations with respect to
         # energy lowest determinant
@@ -100,22 +102,53 @@ class AddSingles:
         )
         print(f"Number of all singles in csfs: {len(csfs_singles)}")
 
-        det_basis = []
         # read wavefunction
         if wftype == "csf":
             csf_coefficients, csfs, CI_coefficients, wfpretext = (
                 self.sCI.read_AMOLQC_csfs(f"{wavefunction_name}.wf", N)
             )
-            _, _, det_basis = self.sCI.get_transformation_matrix(
-                csf_coefficients, csfs, CI_coefficients
+            # remove singles from wave function
+            degree_of_excitation = self.sCI.determine_excitations(
+                csfs, initial_determinant, wf_type=wftype
             )
+            csfs = [
+                det
+                for det, degree in zip(det_basis, degree_of_excitation)
+                if not degree == 1
+            ]
+
         elif wftype == "det":
             _, det_basis, CI_coefficients, wfpretext = (
                 self.sCI.read_AMOLQC_csfs(
                     f"{wavefunction_name}.wf", N, wftype="det"
                 )
             )
+            # remove singles from wave function
+            degree_of_excitation = self.sCI.determine_excitations(
+                det_basis, initial_determinant, wf_type=wftype
+            )
+            det_basis = [
+                det
+                for det, degree in zip(det_basis, degree_of_excitation)
+                if not degree == 1
+            ]
+            all_determinants = (
+                det_basis[:1] + excited_determinants + det_basis[1:]
+            )
 
+        CI_coefficients = [
+            1 if n == 0 else 0 for n in range(len(all_determinants))
+        ]
+
+        self.sCI.write_AMOLQC(
+            csf_coefficients,
+            all_determinants,
+            CI_coefficients,
+            pretext=wfpretext,
+            file_name=f"{wavefunction_name}_add_sgls.wf",
+            wftype=wftype,
+        )
+        return None
         # sort determinants in basis to amolqc format
         # (sign changes can be ignored because coefficients are assigned
         # later with guess)
