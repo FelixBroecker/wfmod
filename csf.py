@@ -863,36 +863,42 @@ to parse CSF energy contributions."
 
     def get_initial_wf(
         self,
-        S,
-        M_s,
-        n_MO,
-        initial_determinant,
+        quantum_number_s,
+        quantum_number_ms,
+        n_electrons,
+        n_orbitals,
         excitations,
         orbital_symmetry,
-        total_symmetry,
-        frozen_elecs,
-        frozen_MOs,
-        filename,
+        point_group,
+        filename="wavefunction",
+        initial_determinant=[],
+        frozen_MOs=[],
+        frozen_electrons=[],
         split_at=0,
         sort_option="",
         verbose=False,
     ):
-        """get initial wave function for selected Configuration Interaction in Amolqc format."""
-        N = len(initial_determinant)
+        """get initial wave function for selected Configuration Interaction in amolqc format."""
+        if not initial_determinant:
+            initial_determinant = self.build_energy_lowest_detetminant(
+                n_electrons
+            )
         determinant_basis = []
 
         # get excitation determinants from ground state HF determinant
         time1 = time.time()
         excited_determinants = self.get_excitations(
-            n_MO,
+            n_orbitals,
             excitations,
             initial_determinant,
             orbital_symmetry=orbital_symmetry,
-            tot_sym=total_symmetry,
-            core=frozen_elecs,
+            tot_sym=point_group,
+            core=frozen_electrons,
             frozen_MOs=frozen_MOs,
         )
-        print(f"time to obtain all excitations: {time.time()-time1}")
+        if verbose:
+            print(f"time to obtain all excitations: {time.time()-time1}")
+
         determinant_basis += [initial_determinant]
         determinant_basis += excited_determinants
         if verbose:
@@ -901,7 +907,7 @@ to parse CSF energy contributions."
 
         # form csfs from determinants in determinant basis
         csf_coefficients, csfs = self.get_unique_csfs(
-            determinant_basis, S, M_s
+            determinant_basis, quantum_number_s, quantum_number_ms
         )
         if verbose:
             print(f"number of csfs {len(csf_coefficients)}")
@@ -926,9 +932,14 @@ to parse CSF energy contributions."
         # read wave function pretext from already generated wavefunction
         wfpretext = ""
         try:
-            _, _, _, wfpretext = self.read_AMOLQC_csfs(f"{filename}.wf", N)
-        except:
-            FileNotFoundError
+            _, _, _, wfpretext = self.read_AMOLQC_csfs(
+                f"{filename}.wf", n_electrons, verbose=verbose
+            )
+        except FileNotFoundError:
+            if verbose:
+                print(f"File {filename}.wf could not be found to read.")
+                print()
+
         if split_at > 0:
             # prints csfs inlcusive the indice of split at in first wf and residual in second
             self.write_AMOLQC(
