@@ -180,23 +180,44 @@ def main():
         )
 
     def det2csf(
-        n_electrons, quantum_number_s, quantum_number_ms, input_wavefunction
+        n_electrons,
+        quantum_number_s,
+        quantum_number_ms,
+        input_wavefunction,
+        output_wavefunction="",
+        verbose=True,
     ):
         """Convert determinant wave funtion to CSF wave function by
         adding all missing determinants for the formation of CSFs."""
         # form csfs of these determinants
-        _, determinants, CI_coefficients, wfpretext = sCI.read_AMOLQC_csfs(
+        _, determinants, _, wfpretext = sCI.read_AMOLQC_csfs(
             f"{input_wavefunction}.wf", n_electrons, wftype="det"
         )
 
-        csf_coefficients, csfs = sCI.get_unique_csfs(determinants, S, M_s)
+        csf_coefficients, csfs = sCI.get_unique_csfs(
+            determinants, quantum_number_s, quantum_number_ms
+        )
         csf_coefficients, csfs = sCI.sort_determinants_in_csfs(
             csf_coefficients, csfs
         )
         CI_coefficients = [1 if n == 0 else 0 for n in range(len(csfs))]
-        print(
-            f"number of csfs generated from {n_dets} determinants is \
-            {len(csfs)}."
+
+        if verbose:
+            print(
+                f"number of csfs generated from {len(determinants)} determinants is "
+                f"{len(csfs)}."
+            )
+
+        if not output_wavefunction:
+            output_wavefunction = f"{input_wavefunction}_out"
+
+        sCI.write_AMOLQC(
+            csf_coefficients,
+            csfs,
+            CI_coefficients,
+            pretext=wfpretext,
+            file_name=f"{output_wavefunction}.wf",
+            wftype="csf",
         )
 
     FUNCTIONS = {
@@ -204,6 +225,7 @@ def main():
         "csf2det": csf2det,
         "cut": cut,
         "sort": sort,
+        "det2csf": det2csf,
     }
 
     # print header
