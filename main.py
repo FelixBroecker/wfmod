@@ -2,11 +2,10 @@
 
 import sys
 import numpy as np
-import time
 import yaml
 import json
-import math
 from pyscript import *  # requirement pyscript as python package https://github.com/Leonard-Reuter/pyscript
+
 from csf import SelectedCI
 from automation import Automation
 from evaluation import Evaluation
@@ -15,8 +14,22 @@ from cipsi_jas import AddSingles
 
 
 def main():
+
+    evaluation = Evaluation()
+    utils = Utils()
     sCI = SelectedCI()
 
+    FUNCTIONS = {
+        "generate_wavefunction": sCI.get_initial_wf,
+    }
+
+    # print header
+    print(" " + "=" * 40)
+    print(" Wave function generation and editation.")
+    print(" " + "=" * 40)
+    print()
+
+    # if no input file is given, print usage and exit
     if len(sys.argv) == 1:
         sys.exit(
             """
@@ -28,9 +41,26 @@ def main():
             <infile> being an .yaml file with all specification on molecule and demanded calculations.
     """
         )
+
     input_file = sys.argv[1]
+
+    # read input file
     with open(input_file, "r") as reffile:
         input_data = yaml.safe_load(reffile)
+
+    # call functions from input data
+    for step in input_data.get("pipeline", []):
+        func_name = step.get("function")
+        args = step.get("args", {})
+        func = FUNCTIONS.get(func_name)
+        if func:
+            try:
+                print(f"Calling function '{func_name}':")
+                func(**args)
+            except Exception as e:
+                print(f"Error in function {func_name}: {e}")
+                sys.exit(1)
+    exit()
 
     # default parameter
     data = {
@@ -78,8 +108,6 @@ def main():
     for key, value in input_data.items():
         for sub_key, sub_value in value.items():
             data[key][sub_key] = sub_value
-    # TODO print input mor readable
-    # print(data)
 
     # print header
     print(" " + "=" * 40)
@@ -143,8 +171,7 @@ def main():
         keep_all_singles,
         max_csfs,
     )
-    evaluation = Evaluation()
-    utils = Utils()
+
     if not initial_determinant:
         initial_determinant = sCI.build_energy_lowest_detetminant(N)
 
