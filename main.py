@@ -179,14 +179,17 @@ def main():
             wftype=wftype,
         )
 
-    def det2csf(wavefunction_name):
+    def det2csf(
+        n_electrons, quantum_number_s, quantum_number_ms, input_wavefunction
+    ):
         """Convert determinant wave funtion to CSF wave function by
         adding all missing determinants for the formation of CSFs."""
         # form csfs of these determinants
-        csf_coefficients, csfs, CI_coefficients, wfpretext = (
-            sCI.read_AMOLQC_csfs(f"{wavefunction_name}.wf", N)
+        _, determinants, CI_coefficients, wfpretext = sCI.read_AMOLQC_csfs(
+            f"{input_wavefunction}.wf", n_electrons, wftype="det"
         )
-        csf_coefficients, csfs = sCI.get_unique_csfs(csfs[:split_at], S, M_s)
+
+        csf_coefficients, csfs = sCI.get_unique_csfs(determinants, S, M_s)
         csf_coefficients, csfs = sCI.sort_determinants_in_csfs(
             csf_coefficients, csfs
         )
