@@ -19,43 +19,57 @@ def main():
     utils = Utils()
     sCI = SelectedCI()
 
-    def csf2det(wavefunction_name, n_electrons, verbose):
+    def csf2det(
+        input_wavefunction, n_electrons, output_wavefunction="", verbose=False
+    ):
         """Convert CSF wave function to determinant wave function with a CI guess for the determiants."""
         # TODO multiply prefactors to get correct CI coefficient per determinant
         csf_coefficients, csfs, CI_coefficients, wfpretext = (
             sCI.read_AMOLQC_csfs(
-                f"{wavefunction_name}.wf", n_electrons, verbose=verbose
+                f"{input_wavefunction}.wf", n_electrons, verbose=verbose
             )
         )
-        print(f"Number of csfs: {len(csfs)}.")
-        print("Convert CSFs to determinants.")
+
+        if verbose:
+            print(f"Number of csfs: {len(csfs)}.")
+            print("Convert CSFs to determinants.")
+
         CI_coefficients, _, dets = sCI.get_transformation_matrix(
             csf_coefficients, csfs, CI_coefficients
         )
-        print(f"Number of determinants: {len(dets)}.")
+
         CI_coefficients = np.diagonal(CI_coefficients)
         CI_coefficients = [1 if n == 0 else 0 for n in range(len(dets))]
         csf_coefficients = []
-        print("Write wave function.")
+
+        if verbose:
+            print(f"Number of determinants: {len(dets)}.")
+            print("Write wave function.")
+
+        if not output_wavefunction:
+            output_wavefunction = f"{input_wavefunction}_out"
+
         sCI.write_AMOLQC(
             csf_coefficients,
             dets,
             CI_coefficients,
             pretext=wfpretext,
-            file_name=f"{wavefunction_name}_out.wf",
+            file_name=f"{output_wavefunction}.wf",
             wftype="det",
         )
 
     def cut(
         n_electrons,
         split_at,
-        wavefunction_name,
+        input_wavefunction,
         wftype="csf",
+        output_wavefunction="",
+        verbose=True,
     ):
         """Cut wavefunction after split_at."""
         csf_coefficients, determiants, CI_coefficients, wfpretext = (
             sCI.read_AMOLQC_csfs(
-                f"{wavefunction_name}.wf", n_electrons, wftype=wftype
+                f"{input_wavefunction}.wf", n_electrons, wftype=wftype
             )
         )
 
@@ -64,45 +78,106 @@ def main():
                 1 if n == 0 else 0 for n in range(len(determiants))
             ]
 
-        print("Write wave function.")
+        if verbose:
+            print("Write wave function.")
 
         try:
+            if not output_wavefunction:
+                output_wavefunction = f"{input_wavefunction}_out"
+
             sCI.write_AMOLQC(
                 csf_coefficients[:split_at],
                 determiants[:split_at],
                 CI_coefficients[:split_at],
                 pretext=wfpretext,
-                file_name=f"{wavefunction_name}_out.wf",
+                file_name=f"{output_wavefunction}.wf",
                 wftype=wftype,
             )
         except IndexError as e:
-            raise IndexError(
-                f"{e}: Maybe the wrong wftype is specified "
-                "in the input file?"
+            print(
+                f"Error in function cut: {e}: Maybe the wrong wftype is "
+                "specified in the input file?"
             )
 
-    def sort():
+    def sort(
+        input_wavefunction,
+        n_electrons,
+        criterion,
+        output_wavefunction="",
+        initial_determinant=[],
+        wftype="csf",
+        verbose=True,
+    ):
         """Sort wave function by criterion."""
+
+        if wftype == "det":
+            # TODO sorting of determinant wave functions
+            print(
+                "Sorting of determinant wave functions is not implemented yet.\n"
+                "Please use the csf wave function type."
+            )
+            return
+
+        csf_coefficients, determiants, CI_coefficients, wfpretext = (
+            sCI.read_AMOLQC_csfs(
+                f"{input_wavefunction}.wf", n_electrons, wftype=wftype
+            )
+        )
+
         if criterion == "ci_coefficient":
             # sort by CI coefficient
-            print("Sort wave function by absolute CI coefficient.")
-            csf_coefficients, csfs, CI_coefficients = sCI.sort_lists_by_list(
-                [csf_coefficients, csfs, CI_coefficients],
-                CI_coefficients,
-                side=-1,
-                absol=True,
+            if verbose:
+                print("Sort wave function by absolute CI coefficient.")
+            csf_coefficients, determiants, CI_coefficients = (
+                sCI.sort_lists_by_list(
+                    [csf_coefficients, determiants, CI_coefficients],
+                    CI_coefficients,
+                    side=-1,
+                    absol=True,
+                )
             )
         elif criterion == "by_excitation":
-            ref_determinant = sCI.build_energy_lowest_detetminant(N)
-            # sort by CI coefficient
-            print("Sort wave function by level of excitation.")
-            csf_coefficients, csfs, CI_coefficients = sCI.sort_order_of_csfs(
-                csf_coefficients,
-                csfs,
-                CI_coefficients,
-                "by_excitation",
-                ref_determinant,
+            if not initial_determinant:
+                initial_determinant = sCI.build_energy_lowest_detetminant(
+                    n_electrons
+                )
+            # sort by level of excitation
+            if verbose:
+                print("Sort wave function by level of excitation.")
+            csf_coefficients, determiants, CI_coefficients = (
+                sCI.sort_order_of_csfs(
+                    csf_coefficients,
+                    determiants,
+                    CI_coefficients,
+                    "by_excitation",
+                    initial_determinant,
+                )
             )
+        elif criterion == "random":
+            # sort in random order but keep ground state at first position
+            if verbose:
+                print("Sort wave function by level of excitation.")
+            csf_coefficients, determiants, CI_coefficients = (
+                sCI.sort_order_of_csfs(
+                    csf_coefficients,
+                    determiants,
+                    CI_coefficients,
+                    "random",
+                    initial_determinant,
+                )
+            )
+
+        if not output_wavefunction:
+            output_wavefunction = f"{input_wavefunction}_out"
+
+        sCI.write_AMOLQC(
+            csf_coefficients,
+            determiants,
+            CI_coefficients,
+            pretext=wfpretext,
+            file_name=f"{output_wavefunction}.wf",
+            wftype=wftype,
+        )
 
     def det2csf(wavefunction_name):
         """Convert determinant wave funtion to CSF wave function by
@@ -125,6 +200,7 @@ def main():
         "generate_wavefunction": sCI.get_initial_wf,
         "csf2det": csf2det,
         "cut": cut,
+        "sort": sort,
     }
 
     # print header
