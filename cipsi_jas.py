@@ -110,3 +110,43 @@ class AddSingles:
                 f"added determinants: \
                     {len(determinant_basis_csfs)-len(determinants)}"
             )
+
+    # def read_cipsi(self, wavefunction_name, S, M_s, split_at):
+    #     wf_name_praefix = wavefunction_name.split(".")[0]
+    #     # parse determinants and print them in AMOLQC format
+    #     ci_coefficients, determinants = utils.parse_cipsi_dets(
+    #         wavefunction_name
+    #     )
+    #     sCI.write_AMOLQC(
+    #         [],
+    #         determinants[:split_at],
+    #         ci_coefficients[:split_at],
+    #         pretext="",
+    #         file_name=f"{wf_name_praefix}_dets.wf",
+    #         wftype="det",
+    #     )
+    #     print(len(determinants))
+
+    #     # get csfs from determinant basis and print wavefunction.
+    #     # create guess for CI coefficients
+    #     csf_coefficients, csfs = sCI.get_unique_csfs(determinants, S, M_s)
+    #     csf_coefficients, csfs = sCI.sort_determinants_in_csfs(
+    #         csf_coefficients, csfs
+    #     )
+    #     ci_csf_coefficients = [1 if n == 0 else 0 for n in range(len(csfs))]
+
+    #     sCI.write_AMOLQC(
+    #         csf_coefficients[:split_at],
+    #         csfs[:split_at],
+    #         ci_csf_coefficients[:split_at],
+    #         pretext="",
+    #         file_name=f"{wf_name_praefix}_csfs.wf",
+    #     )
+    #     print(f"len csfs: {len(csfs)}")
+
+    #     # expand again in determinants to see how may
+    #     # determinants have been added
+    #     _, _, determinant_basis_csfs = sCI.get_transformation_matrix(
+    #         csf_coefficients, csfs, range(len(csf_coefficients))
+    #     )
+    #     print(len(determinant_basis_csfs))
