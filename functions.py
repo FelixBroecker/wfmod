@@ -214,3 +214,132 @@ class Functions(sCI):
             file_name=f"{output_wavefunction}.wf",
             wftype="csf",
         )
+
+    def add_singles(
+        self,
+        n_electrons,
+        quantum_number_s,
+        quantum_number_ms,
+        n_orbitals,
+        input_wavefunction,
+        frozen_electrons=[],
+        frozen_MOs=[],
+        orbital_symmetry=[],
+        point_group="",
+        wftype="csf",
+        initial_determinant=[],
+        wfpretext="",
+        verbose=True,
+    ):
+        """Add all single excitations to the wavefunction"""
+        csf_coefficients = []
+
+        if not initial_determinant:
+            # build energy lowest determinant
+            initial_determinant = self.build_energy_lowest_detetminant(
+                n_electrons
+            )
+
+        # build all single excitations with respect to
+        # energy lowest determinant
+        excited_determinants = self.get_excitations(
+            n_orbitals,
+            [1],
+            initial_determinant,
+            orbital_symmetry=orbital_symmetry,
+            tot_sym=point_group,
+            core=frozen_electrons,
+            frozen_MOs=frozen_MOs,
+        )
+
+        # sort determinants in Amolqc format
+        temp = []
+        for det in excited_determinants:
+            _, det_tmp = self.sort_determinant(1, det)
+            temp.append(det_tmp)
+        excited_determinants = temp.copy()
+        print(
+            f"Number of all singles in determinants: {len(excited_determinants)}"
+        )
+
+        if wftype == "csf":
+
+            # get single csfs from determinant basis
+            csf_coefficients_singles, csfs_singles = self.get_unique_csfs(
+                excited_determinants.copy(),
+                quantum_number_s,
+                quantum_number_ms,
+            )
+            csf_coefficients_singles, csfs_singles = (
+                self.sort_determinants_in_csfs(
+                    csf_coefficients_singles, csfs_singles
+                )
+            )
+            if verbose:
+                print(f"Number of all singles in csfs: {len(csfs_singles)}")
+
+            # read wave function
+            csf_coefficients, csfs, CI_coefficients, wfpretext = (
+                self.read_AMOLQC_csfs(
+                    f"{input_wavefunction}.wf", n_electrons, wftype=wftype
+                )
+            )
+
+            # remove singles from wave function
+            degree_of_excitation = self.determine_excitations(
+                csfs, initial_determinant, wf_type=wftype
+            )
+            csfs = [
+                csf
+                for csf, degree in zip(csfs, degree_of_excitation)
+                if not degree == 1
+            ]
+            csf_coefficients = [
+                coeff
+                for coeff, degree in zip(
+                    csf_coefficients, degree_of_excitation
+                )
+                if not degree == 1
+            ]
+
+            # add singles to csf basis
+            all_determinants = csfs[:1] + csfs_singles + csfs[1:]
+            csf_coefficients = (
+                csf_coefficients[:1]
+                + csf_coefficients_singles
+                + csf_coefficients[1:]
+            )
+
+        elif wftype == "det":
+            # read wave function
+            _, det_basis, CI_coefficients, wfpretext = self.read_AMOLQC_csfs(
+                f"{input_wavefunction}.wf", n_electrons, wftype="det"
+            )
+
+            # remove singles from wave function
+            degree_of_excitation = self.determine_excitations(
+                det_basis, initial_determinant, wf_type=wftype
+            )
+            det_basis = [
+                det
+                for det, degree in zip(det_basis, degree_of_excitation)
+                if not degree == 1
+            ]
+
+            # add singles to determinant basis
+            all_determinants = (
+                det_basis[:1] + excited_determinants + det_basis[1:]
+            )
+
+        CI_coefficients = [
+            1 if n == 0 else 0 for n in range(len(all_determinants))
+        ]
+
+        self.write_AMOLQC(
+            csf_coefficients,
+            all_determinants,
+            CI_coefficients,
+            pretext=wfpretext,
+            file_name=f"{input_wavefunction}_add_sgls.wf",
+            wftype=wftype,
+        )
