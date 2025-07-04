@@ -338,6 +338,9 @@ class Evaluation:
                 for i, item in enumerate(degree_of_excitation):
                     counter[item] += 1
                     reffile.write(f"{item}\n")
+        else:
+            for item in degree_of_excitation:
+                counter[item] += 1
 
         if verbose:
             print()
