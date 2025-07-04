@@ -222,6 +222,7 @@ class Functions(sCI):
         quantum_number_ms,
         n_orbitals,
         input_wavefunction,
+        output_wavefunction="",
         frozen_electrons=[],
         frozen_MOs=[],
         orbital_symmetry=[],
@@ -335,11 +336,14 @@ class Functions(sCI):
             1 if n == 0 else 0 for n in range(len(all_determinants))
         ]
 
+        if not output_wavefunction:
+            output_wavefunction = f"{input_wavefunction}_add_sgls"
+
         self.write_AMOLQC(
             csf_coefficients,
             all_determinants,
             CI_coefficients,
             pretext=wfpretext,
-            file_name=f"{input_wavefunction}_add_sgls.wf",
+            file_name=f"{output_wavefunction}.wf",
             wftype=wftype,
         )
