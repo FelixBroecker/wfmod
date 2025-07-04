@@ -8,35 +8,35 @@ from csf import SelectedCI
 class Automation:
     def __init__(
         self,
-        wavefunction_name,
-        N,
-        S,
-        M_s,
-        n_MO,
-        excitations,
-        orbital_symmetry,
-        point_group,
-        frozen_electrons,
-        frozen_MOs,
-        partition,
-        n_tasks,
-        criterion: str,
-        blocksize,
-        n_expand,
-        sort_option,
-        verbose,
-        n_min,
-        threshold,
-        threshold_type,
-        keep_all_singles,
-        max_csfs,
+        input_wavefunction,
+        n_electrons,
+        n_orbitals,
+        quantum_number_s,
+        quantum_number_ms,
+        orbital_symmetry=[],
+        point_group=None,
+        frozen_electrons=[],
+        frozen_MOs=[],
+        excitations=[],
+        n_min=0,
+        threshold=1.0,
+        threshold_type="cut_at",
+        blocksize=1000,
+        n_expand=40,
+        sort="by_excitation",
+        criterion="ci_coefficient",
+        partition="p64",
+        n_tasks="704",
+        keep_all_singles=False,
+        max_csfs=3000,
+        verbose=True,
     ):
         self.sCI = SelectedCI()
-        self.wavefunction_name = wavefunction_name
-        self.N = N
-        self.S = S
-        self.M_s = M_s
-        self.n_MO = n_MO
+        self.wavefunction_name = input_wavefunction
+        self.N = n_electrons
+        self.S = quantum_number_s
+        self.M_s = quantum_number_ms
+        self.n_MO = n_orbitals
         self.excitations = excitations
         self.orbital_symmetry = orbital_symmetry
         self.point_group = point_group
@@ -44,7 +44,7 @@ class Automation:
         self.frozen_MOs = frozen_MOs
         self.blocksize = blocksize
         self.n_expand = n_expand
-        self.sort_option = sort_option
+        self.sort_option = sort
         self.verbose = verbose
         self.partition = partition
         self.n_tasks = n_tasks
@@ -935,7 +935,7 @@ blockwise opimization is finished."
     def blockwise_optimization(
         self,
         initial_ami,
-        blockwise_ami,
+        iteration_ami,
         final_ami,
         energy_ami="",
         max_blocks=1000,
@@ -960,7 +960,7 @@ blockwise opimization is finished."
         # n_blocks = math.ceil(174 / (self.blocksize - self.n_min))
         # blockwise iteration
         last_block = self.do_block_iteration(
-            n_blocks, "block_initial", blockwise_ami, energy_ami=energy_ami
+            n_blocks, "block_initial", iteration_ami, energy_ami=energy_ami
         )
         # final block
         self.do_final_block("final", f"{last_block}", final_ami)
