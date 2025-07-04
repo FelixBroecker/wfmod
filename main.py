@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-import numpy as np
 import yaml
-import json
 from pyscript import *  # requirement pyscript as python package https://github.com/Leonard-Reuter/pyscript
 
 from csf import SelectedCI
@@ -13,8 +11,6 @@ from utils import Utils
 from cipsi_jas import AddSingles
 from functions import Functions
 
-evaluation = Evaluation()
-utils = Utils()
 sCI = SelectedCI()
 funcs = Functions()
 
@@ -120,159 +116,6 @@ def main():
                 print(f"Error in function {func_name}: {e}")
                 sys.exit(1)
 
-    exit()
-
-    # default parameter
-    data = {
-        "MoleculeInformation": {
-            "numberOfElectrons": 0,
-            "numberOfOrbitals": 0,
-            "orbitalSymmetries": [],
-            "pointGroup": "",
-            "quantumNumber_S": 0,
-            "quantumNumber_Ms": 0,
-        },
-        "WavefunctionOptions": {
-            "wavefunctionName": "sCI",
-            "wavefunctionOperation": "initial",
-            "sort": "excitations",
-            "initialDeterminant": [],
-            "excitations": [],
-            "frozenElectrons": [],
-            "frozenMOs": [],
-            "splitAt": 0,
-            "maxCsfs": 1500,
-            "wfType": "csf",
-        },
-        "Output": {
-            "plotCICoefficients": False,
-            "plotly": False,
-        },
-        "Specifications": {
-            "criterion": "",
-            "threshold": 1.0,
-            "thresholdType": "cut_at",
-            "keepMin": 0,
-            "blocksize": 0,
-            "nExpand": 0,
-            "initialAMI": "",
-            "iterationAMI": "",
-            "finalAMI": "",
-            "energyAMI": "",
-            "keepAllSingles": False,
-        },
-        "Hardware": {"partition": "p16", "nTasks": "144"},
-    }
-
-    # load input in data
-    for key, value in input_data.items():
-        for sub_key, sub_value in value.items():
-            data[key][sub_key] = sub_value
-
-    # print header
-    print(" " + "=" * 40)
-    print(" Wave function generation and editation.")
-    print(" " + "=" * 40)
-    print()
-
-    N = data["MoleculeInformation"]["numberOfElectrons"]
-    n_MO = data["MoleculeInformation"]["numberOfOrbitals"]
-    S = data["MoleculeInformation"]["quantumNumber_S"]
-    M_s = data["MoleculeInformation"]["quantumNumber_Ms"]
-    point_group = data["MoleculeInformation"]["pointGroup"]
-    orbital_symmetry = data["MoleculeInformation"]["orbitalSymmetries"]
-
-    wavefunction_name = data["WavefunctionOptions"]["wavefunctionName"]
-    initial_determinant = data["WavefunctionOptions"]["initialDeterminant"]
-    excitations = data["WavefunctionOptions"]["excitations"]
-    frozen_electrons = data["WavefunctionOptions"]["frozenElectrons"]
-    frozen_MOs = data["WavefunctionOptions"]["frozenMOs"]
-    split_at = data["WavefunctionOptions"]["splitAt"]
-    sort = data["WavefunctionOptions"]["sort"]
-    max_csfs = data["WavefunctionOptions"]["maxCsfs"]
-    wftype = data["WavefunctionOptions"]["wfType"]
-
-    criterion = data["Specifications"]["criterion"]
-    threshold = float(data["Specifications"]["threshold"])
-    threshold_type = data["Specifications"]["thresholdType"]
-    n_min = data["Specifications"]["keepMin"]
-    blocksize = data["Specifications"]["blocksize"]
-    n_expand = data["Specifications"]["nExpand"]
-    initial_ami = data["Specifications"]["initialAMI"]
-    iteration_ami = data["Specifications"]["iterationAMI"]
-    energy_ami = data["Specifications"]["energyAMI"]
-    final_ami = data["Specifications"]["finalAMI"]
-    keep_all_singles = data["Specifications"]["keepAllSingles"]
-
-    partition = data["Hardware"]["partition"]
-    n_tasks = data["Hardware"]["nTasks"]
-
-    auto = Automation(
-        wavefunction_name,
-        N,
-        S,
-        M_s,
-        n_MO,
-        excitations,
-        orbital_symmetry,
-        point_group,
-        frozen_electrons,
-        frozen_MOs,
-        partition,
-        n_tasks,
-        criterion,
-        blocksize,
-        n_expand,
-        sort,
-        True,
-        n_min,
-        threshold,
-        threshold_type,
-        keep_all_singles,
-        max_csfs,
-    )
-
-    # call demanded routine
-    if data["WavefunctionOptions"]["wavefunctionOperation"] == "initial":
-        ...
-
-    elif data["WavefunctionOptions"]["wavefunctionOperation"] == "blockwise":
-        ...
-
-    elif data["WavefunctionOptions"]["wavefunctionOperation"] == "csf2det":
-        ...
-
-    elif data["WavefunctionOptions"]["wavefunctionOperation"] == "cut":
-        ...
-
-    elif data["WavefunctionOptions"]["wavefunctionOperation"] == "sort":
-        ...
-
-    elif data["WavefunctionOptions"]["wavefunctionOperation"] == "iterative":
-        ...
-
-    elif (
-        data["WavefunctionOptions"]["wavefunctionOperation"] == "determine_exc"
-    ):
-        ...
-
-    elif data["WavefunctionOptions"]["wavefunctionOperation"] == "exc":
-        ...
-
-    elif data["WavefunctionOptions"]["wavefunctionOperation"] == "add_singles":
-        ...
-
-    elif data["WavefunctionOptions"]["wavefunctionOperation"] == "read_cipsi":
-        ...
-
-    elif data["WavefunctionOptions"]["wavefunctionOperation"] == "eval":
-        """Evaluate blockwise optimization."""
-        ...
-
-    if data["Output"]["plotCICoefficients"]:
-        ...
-
 
 # program starts
-
 main()
