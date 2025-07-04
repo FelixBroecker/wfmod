@@ -19,6 +19,15 @@ sCI = SelectedCI()
 funcs = Functions()
 
 
+def header():
+    """Print header."""
+    print()
+    print(" " + "=" * 40)
+    print(" Wave function generation and editation.")
+    print(" " + "=" * 40)
+    print()
+
+
 def main():
     FUNCTIONS = {
         "generate_wavefunction": sCI.get_initial_wf,
@@ -28,11 +37,16 @@ def main():
         "det2csf": funcs.det2csf,
     }
 
+    CLASS_REGISTRY = {
+        "SelectedCI": SelectedCI,
+        "Automation": Automation,
+        "Evaluation": Evaluation,
+        "Utils": Utils,
+        "AddSingles": AddSingles,
+    }
+
     # print header
-    print(" " + "=" * 40)
-    print(" Wave function generation and editation.")
-    print(" " + "=" * 40)
-    print()
+    header()
 
     # if no input file is given, print usage and exit
     if len(sys.argv) == 1:
@@ -54,11 +68,48 @@ def main():
         input_data = yaml.safe_load(reffile)
 
     # call functions from input data
+    cls = None
     for step in input_data.get("pipeline", []):
         func_name = step.get("function")
+        class_name = step.get("class_name") or ""
         args = step.get("args", {})
         func = FUNCTIONS.get(func_name)
-        if func:
+
+        if func_name == "initialize_class":
+            if class_name in CLASS_REGISTRY:
+                cls = CLASS_REGISTRY[class_name](**args)
+                print(f"Class '{class_name}' has been initialized.")
+                print()
+            else:
+                raise KeyError(f"Class {class_name} not found in registry.")
+
+        elif class_name:
+
+            assert class_name in CLASS_REGISTRY, "Class not found in registry."
+
+            # check if class is initialized
+            assert (
+                cls is not None
+            ), "Class is not initialized. Please initialize the class before calling methods."
+
+            # call function from class
+            try:
+                print(f"Calling function '{class_name}.{func_name}':")
+                print("-" * 21 + "-" * (len(class_name) + len(func_name)))
+
+                if hasattr(cls, func_name):
+                    getattr(cls, func_name)(**args)
+                else:
+                    raise AssertionError(
+                        f"Function '{func_name}' not found in {cls}"
+                    )
+
+                print()
+            except Exception as e:
+                print(f"Error in function {func_name}: {e}")
+                sys.exit(1)
+
+        elif func:
             try:
                 print(f"Calling function '{func_name}':")
                 print("-" * 20 + "-" * len(func_name))
