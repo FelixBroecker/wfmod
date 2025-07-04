@@ -295,18 +295,27 @@ class Evaluation:
 
     def get_excitations_degree(
         self,
-        N,
+        n_electrons,
         wavefunction_name,
-        initial_determinant,
-        wftype,
+        initial_determinant=[],
+        wftype="csf",
         max_degree=20,
         print_file=False,
         verbose=False,
     ):
         """Determine degree of excitation per  in wavefunction"""
+
+        if not initial_determinant:
+            initial_determinant = self.sCI.build_energy_lowest_detetminant(
+                n_electrons
+            )
+
         csf_coefficients, csfs, CI_coefficients, wfpretext = (
-            self.sCI.read_AMOLQC_csfs(f"{wavefunction_name}.wf", N)
+            self.sCI.read_AMOLQC_csfs(
+                f"{wavefunction_name}.wf", n_electrons, wftype=wftype
+            )
         )
+
         # sort absolute CI coefficients in descending order
         csf_coefficients, csfs, CI_coefficients = self.sCI.sort_lists_by_list(
             [csf_coefficients, csfs, CI_coefficients],
