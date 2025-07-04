@@ -35,6 +35,7 @@ def main():
         "cut": funcs.cut,
         "sort_wf": funcs.sort_wf,
         "det2csf": funcs.det2csf,
+        "add_singles": funcs.add_singles,
     }
 
     CLASS_REGISTRY = {
@@ -236,173 +237,27 @@ def main():
         ...
 
     elif data["WavefunctionOptions"]["wavefunctionOperation"] == "blockwise":
-        auto.blockwise_optimization(
-            initial_ami,
-            iteration_ami,
-            final_ami,
-            energy_ami=energy_ami,
-        )
+        ...
 
     elif data["WavefunctionOptions"]["wavefunctionOperation"] == "csf2det":
         ...
 
     elif data["WavefunctionOptions"]["wavefunctionOperation"] == "cut":
-        # read wf and cut by split_at
-        csf_coefficients, csfs, CI_coefficients, wfpretext = (
-            sCI.read_AMOLQC_csfs(f"{wavefunction_name}.wf", N)
-        )
-        if criterion == "ci_coefficient":
-            # sort by CI coefficient
-            print("Sort wave function by absolute CI coefficient.")
-            csf_coefficients, csfs, CI_coefficients = sCI.sort_lists_by_list(
-                [csf_coefficients, csfs, CI_coefficients],
-                CI_coefficients,
-                side=-1,
-                absol=True,
-            )
-        elif criterion == "by_excitation":
-            ref_determinant = sCI.build_energy_lowest_detetminant(N)
-            # sort by CI coefficient
-            print("Sort wave function by level of excitation.")
-            csf_coefficients, csfs, CI_coefficients = sCI.sort_order_of_csfs(
-                csf_coefficients,
-                csfs,
-                CI_coefficients,
-                "by_excitation",
-                ref_determinant,
-            )
-
-        if wftype == "csf" and not csf_coefficients:
-            n_dets = len(csfs[:split_at])
-            # form csfs of these determinants
-            csf_coefficients, csfs = sCI.get_unique_csfs(
-                csfs[:split_at], S, M_s
-            )
-            csf_coefficients, csfs = sCI.sort_determinants_in_csfs(
-                csf_coefficients, csfs
-            )
-            CI_coefficients = [1 if n == 0 else 0 for n in range(len(csfs))]
-            print(
-                f"number of csfs generated from {n_dets} determinants is \
-{len(csfs)}."
-            )
-        print("Write wave function.")
-        sCI.write_AMOLQC(
-            csf_coefficients[:split_at],
-            csfs[:split_at],
-            CI_coefficients[:split_at],
-            pretext=wfpretext,
-            file_name=f"{wavefunction_name}_out.wf",
-            wftype=wftype,
-        )
+        ...
 
     elif data["WavefunctionOptions"]["wavefunctionOperation"] == "sort":
-        # read wf and cut by split_at
-        csf_coefficients, csfs, CI_coefficients, wfpretext = (
-            sCI.read_AMOLQC_csfs(f"{wavefunction_name}.wf", N)
-        )
-
-        if criterion == "ci_coefficient":
-            # sort by CI coefficient
-            print("Sort wave function by absolute CI coefficient.")
-            csf_coefficients, csfs, CI_coefficients = sCI.sort_lists_by_list(
-                [csf_coefficients, csfs, CI_coefficients],
-                CI_coefficients,
-                side=-1,
-                absol=True,
-            )
-        elif criterion == "by_excitation":
-            ref_determinant = sCI.build_energy_lowest_detetminant(N)
-            # sort by CI coefficient
-            print("Sort wave function by level of excitation.")
-            csf_coefficients, csfs, CI_coefficients = sCI.sort_order_of_csfs(
-                csf_coefficients,
-                csfs,
-                CI_coefficients,
-                "by_excitation",
-                ref_determinant,
-            )
-
-        print("Write wave function.")
-        sCI.write_AMOLQC(
-            csf_coefficients,
-            csfs,
-            CI_coefficients,
-            pretext=wfpretext,
-            file_name=f"{wavefunction_name}_out.wf",
-            wftype=wftype,
-        )
+        ...
 
     elif data["WavefunctionOptions"]["wavefunctionOperation"] == "iterative":
-        initial_determinant = sCI.build_energy_lowest_detetminant(N)
-        auto.do_iterative_construction(
-            initial_ami,
-            iteration_ami,
-            final_ami,
-            initial_determinant,
-            energy_ami=energy_ami,
-        )
+        ...
 
     elif (
         data["WavefunctionOptions"]["wavefunctionOperation"] == "determine_exc"
     ):
-        print(
-            "Determine excitations of wave functions CSFs (determinants not enabled)."
-        )
-        if not initial_determinant:
-            initial_determinant = sCI.build_energy_lowest_detetminant(N)
-
-        evaluation.get_excitations_degree(
-            N,
-            wavefunction_name,
-            initial_determinant,
-            wftype,
-            max_degree=20,
-            print_file=True,
-            verbose=True,
-        )
+        ...
 
     elif data["WavefunctionOptions"]["wavefunctionOperation"] == "exc":
-        # read wf and cut by split_at
-        csf_coefficients, csfs, CI_coefficients, wfpretext = (
-            sCI.read_AMOLQC_csfs(f"{wavefunction_name}.wf", N)
-        )
-        csf_coefficients, csfs, CI_coefficients = sCI.sort_lists_by_list(
-            [csf_coefficients, csfs, CI_coefficients],
-            CI_coefficients,
-            side=-1,
-            absol=True,
-        )
-        CI_coefficients = [n for n in range(len(csfs), 0, -1)]
-        sCI.write_AMOLQC(
-            csf_coefficients[:split_at],
-            csfs[:split_at],
-            CI_coefficients[:split_at],
-            pretext=wfpretext,
-            file_name=f"mod.wf",
-            wftype=wftype,
-        )
-        reference_determinant = sCI.build_energy_lowest_detetminant(N)
-        sCI.select_and_do_excitations(
-            N,
-            n_MO,
-            S,
-            M_s,
-            reference_determinant,
-            excitations,
-            [1],
-            orbital_symmetry,
-            point_group,
-            frozen_electrons,
-            frozen_MOs,
-            "mod",
-            f"_",
-            criterion,
-            threshold,
-            max_csfs,
-            threshold_type=threshold_type,
-            verbose=True,
-        )
+        ...
 
     elif data["WavefunctionOptions"]["wavefunctionOperation"] == "add_singles":
         aS = AddSingles()
