@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import numpy as np
+import json
 
 from pyscript import *  # requirement pyscript as python package https://github.com/Leonard-Reuter/pyscript
 from csf import SelectedCI
@@ -350,3 +351,65 @@ class Evaluation:
             )
             print(counter)
         return degree_of_excitation, counter
+
+    def evaluate_blockwise(
+        self, n_electrons, initial_determinant=[], wftype="csf", verbose=True
+    ):
+        """Evaluate energy course and excitations degree for each block."""
+
+        if not initial_determinant:
+            initial_determinant = self.sCI.build_energy_lowest_detetminant(
+                n_electrons
+            )
+
+        try:
+            if verbose:
+                print("Create directory eval.")
+            mkdir("eval")
+        except FileExistsError:
+            FileExistsError("Directory eval already exists.")
+
+        # evaluate energy course during blockwise optimization
+        energy_course_data = self.get_energy_course()
+        with open("eval/energy_course.txt", "w") as reffile:
+            for line in energy_course_data:
+                reffile.write(f"{line}\n")
+
+        # evaluate excitaions degree of CSFs per wavefunction 1f each block
+
+        list_of_excitation_lists = []
+        list_of_counter_lists = []
+        list_of_wavefunction_names = []
+
+        for file in files():
+            if file.endswith(".wf"):
+                # get wavefunction name
+                wavefunction_name = file.split(".")[0]
+
+                try:
+                    degree_of_excitation, counter = (
+                        self.get_excitations_degree(
+                            n_electrons,
+                            wavefunction_name,
+                            initial_determinant,
+                            wftype,
+                            max_degree=20,
+                            print_file=False,
+                            verbose=False,
+                        )
+                    )
+                    list_of_excitation_lists.append(degree_of_excitation)
+                    list_of_counter_lists.append(counter)
+                    list_of_wavefunction_names.append(wavefunction_name)
+                except Exception as e:
+                    continue
+
+        with open("eval/excitation.json", "w") as reffile:
+            json.dump(
+                {
+                    "wavefunction_name": list_of_wavefunction_names,
+                    "degree_of_excitation": list_of_excitation_lists,
+                    "counter": list_of_counter_lists,
+                },
+                reffile,
+            )
