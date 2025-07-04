@@ -972,10 +972,14 @@ blockwise opimization is finished."
         initial_ami,
         iteration_ami,
         final_ami,
-        reference_determinant,
+        reference_determinant=[],
         energy_ami="",
     ):
         """"""
+        if not reference_determinant:
+            reference_determinant = self.sCI.build_energy_lowest_detetminant(
+                self.N
+            )
         self.do_initial_block("_ini", initial_ami, energy_ami=energy_ami)
         last_it = self.do_selective_iteration(
             4,
