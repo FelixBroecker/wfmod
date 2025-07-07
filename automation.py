@@ -393,11 +393,19 @@ blockwise opimization is finished."
         block_label: str,
         input_wf: str,
         final_ami: str,
+        dir_name="",
+        split_at=0,
     ):
         #
         # do finial selection from all CI coefficients
         #
-        dir_name = f"block_{block_label}"
+
+        if not split_at:
+            split_at = self.blocksize
+
+        if not dir_name:
+            dir_name = f"block_{block_label}"
+
         mkdir(dir_name)
         with cd(dir_name):
             cp(f"../{input_wf}.wf", ".")
@@ -501,17 +509,17 @@ blockwise opimization is finished."
             )
             #
             self.sCI.write_AMOLQC(
-                csf_coefficients[: self.blocksize],
-                csfs[: self.blocksize],
-                CI_coefficients[: self.blocksize],
+                csf_coefficients[:split_at],
+                csfs[:split_at],
+                CI_coefficients[:split_at],
                 pretext=wfpretext,
                 file_name=f"{self.wavefunction_name}.wf",
             )
             self.sCI.write_AMOLQC(
-                csf_coefficients[self.blocksize :],
-                csfs[self.blocksize :],
-                CI_coefficients[self.blocksize :],
-                energies=energies[self.blocksize :],
+                csf_coefficients[split_at:],
+                csfs[split_at:],
+                CI_coefficients[split_at:],
+                energies=energies[split_at:],
                 file_name=f"{self.wavefunction_name}_dis.wf",
             )
 
@@ -540,6 +548,31 @@ blockwise opimization is finished."
             if self.verbose:
                 print()
                 print("finish final block.")
+
+    def perform_reflows(
+        self,
+        blocks: list,
+        reference_wf: str,
+        final_ami: str,
+        split_at: int = 0,
+    ):
+        """Perform reflow from a blockwise optimization at any stage of the optimization."""
+
+        if not split_at:
+            split_at = self.blocksize
+
+        for i, block in enumerate(blocks):
+            if self.verbose:
+                print(f"Reflow on block {i+1}/{len(blocks)}: {block}")
+            cp(f"{block}/{reference_wf}_dis.wf", f"{block}_dis.wf")
+            # do final block iteration
+            self.do_final_block(
+                block,
+                block,
+                final_ami,
+                dir_name=f"reflow_{block}",
+                split_at=split_at,
+            )
 
     def do_final_iteration(
         self,
