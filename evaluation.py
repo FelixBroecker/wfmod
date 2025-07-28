@@ -416,3 +416,81 @@ class Evaluation:
                 },
                 reffile,
             )
+
+    def get_wavefunction_json(
+        self,
+        n_electrons: int,
+        input_wavefunction: str,
+        output_filename="wavefunction",
+        verbose=False,
+    ):
+        csf_coefficients, csfs, CI_coefficients, _ = self.sCI.read_AMOLQC_csfs(
+            f"{input_wavefunction}.wf", n_electrons
+        )
+
+        # save in file
+        data = {
+            "csf_coefficients": csf_coefficients,
+            "csfs": csfs,
+            "CI_coefficients": CI_coefficients,
+        }
+
+        with open(f"{output_filename}.json", "w") as file:
+            json.dump(data, file)
+
+        if verbose:
+            print(f"Wavefunction data saved to {output_filename}.json")
+
+    def get_coefficients_A_from_B(
+        self,
+        wavefunction_A,
+        wavefunction_B,
+        n_electrons,
+        wftype_A="csf",
+    ):
+        """Assign the coefficients in wave function B to the determinants in wavefunction A"""
+
+        # TODO Wave function b has to be in determinants so far
+
+        # expand csf in determinants
+        if wftype_A == "csf":
+            csf_coefficients_A, csfs_A, CI_coefficients_A, _ = (
+                self.sCI.read_AMOLQC_csfs(f"{wavefunction_A}.wf", n_electrons)
+            )
+            _, _, determinants_A = self.sCI.get_transformation_matrix(
+                csf_coefficients_A, csfs_A, CI_coefficients_A
+            )
+
+        _, determinants_B, CI_coefficients_B, _ = (
+            SelectedCI().read_AMOLQC_csfs(f"{wavefunction_B}.wf", n_electrons)
+        )
+
+        # sort determinants A
+        determinants_A = [
+            self.sCI.sort_determinant(coeff, det)[1]
+            for coeff, det in zip(CI_coefficients_A, determinants_A)
+        ]
+        determinants_B = [
+            self.sCI.sort_determinant(coeff, det)[1]
+            for coeff, det in zip(CI_coefficients_B, determinants_B)
+        ]
+
+        # remove duplicates in determinants A
+        determinants_A = list(set(tuple(det) for det in determinants_A))
+
+        coeffs_A_from_B = []
+        for det_A in determinants_A:
+            for coeff_B, det_B in zip(CI_coefficients_B, determinants_B):
+                if det_A == det_B:
+                    coeffs_A_from_B.append(coeff_B)
+                    break
+            else:
+                print("Warning: Determinant in A not found in B:", det_A)
+
+        sum_up = 0
+        for coeff in coeffs_A_from_B:
+            sum_up += abs(coeff) ** 2
+        print(
+            "Sum of coefficients of determinants of wavefunction A and its ",
+            f"respective coefficients in B: {sum_up:.6f}",
+        )
