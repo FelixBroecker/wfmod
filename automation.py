@@ -554,6 +554,7 @@ blockwise opimization is finished."
         blocks: list,
         reference_wf: str,
         final_ami: str,
+        labels: list = [],
         split_at: int = 0,
     ):
         """Perform reflow from a blockwise optimization at any stage of the optimization."""
@@ -565,12 +566,17 @@ blockwise opimization is finished."
             if self.verbose:
                 print(f"Reflow on block {i+1}/{len(blocks)}: {block}")
             cp(f"{block}/{reference_wf}_dis.wf", f"{block}_dis.wf")
+
+            if not labels:
+                dir_name = f"reflow_{block}"
+            else:
+                dir_name = f"{labels[i]}"
             # do final block iteration
             self.do_final_block(
                 block,
                 block,
                 final_ami,
-                dir_name=f"reflow_{block}",
+                dir_name=dir_name,
                 split_at=split_at,
             )
 
