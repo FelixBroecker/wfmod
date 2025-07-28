@@ -66,10 +66,10 @@ class Functions(sCI):
             )
         )
 
-        if wftype == "det":
-            CI_coefficients = [
-                1 if n == 0 else 0 for n in range(len(determiants))
-            ]
+        # if wftype == "det":
+        #     CI_coefficients = [
+        #         1 if n == 0 else 0 for n in range(len(determiants))
+        #     ]
 
         if verbose:
             print("Write wave function.")
@@ -302,6 +302,16 @@ class Functions(sCI):
                 )
                 if not degree == 1
             ]
+            CI_coefficients = [
+                coeff
+                for coeff, degree in zip(CI_coefficients, degree_of_excitation)
+                if not degree == 1
+            ]
+            CI_coefficients = (
+                CI_coefficients[:1]
+                + [0 for _ in excited_determinants]
+                + CI_coefficients[1:]
+            )
 
             # add singles to csf basis
             all_determinants = csfs[:1] + csfs_singles + csfs[1:]
@@ -326,15 +336,27 @@ class Functions(sCI):
                 for det, degree in zip(det_basis, degree_of_excitation)
                 if not degree == 1
             ]
+            CI_coefficients = [
+                coeff
+                for coeff, degree in zip(CI_coefficients, degree_of_excitation)
+                if not degree == 1
+            ]
+            print(len(CI_coefficients), len(det_basis))
 
             # add singles to determinant basis
             all_determinants = (
                 det_basis[:1] + excited_determinants + det_basis[1:]
             )
 
-        CI_coefficients = [
-            1 if n == 0 else 0 for n in range(len(all_determinants))
-        ]
+            CI_coefficients = (
+                CI_coefficients[:1]
+                + [0 for _ in excited_determinants]
+                + CI_coefficients[1:]
+            )
+
+        # CI_coefficients = [
+        #     1 if n == 0 else 0 for n in range(len(all_determinants))
+        # ]
 
         if not output_wavefunction:
             output_wavefunction = f"{input_wavefunction}_add_sgls"
