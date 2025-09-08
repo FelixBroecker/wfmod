@@ -36,15 +36,17 @@ class SpinCoupling():
                 seen.add(sublist_tuple)
         return res
 
-    def check_geneological(self,x, major_spin):
+    def check_geneological(self, x, major_spin):
         """check if particular path is allowed according to geneological coupling scheme"""
         res = []
 
         # define criterion for step in genealogical spin depending on major spin
         if major_spin >= 0:
-            step_allowed = lambda S: S < 0
+            def step_allowed(S):
+                return S < 0
         elif major_spin < 0:
-            step_allowed = lambda S: S > 0
+            def step_allowed(S):
+                return S > 0
 
         # check which steps are allowed
         for path in x:
@@ -57,7 +59,7 @@ class SpinCoupling():
                     res.append(path)
         return res
 
-    def C_plus(self,S,M,sgm):
+    def C_plus(self, S, M, sgm):
         """Clebsch Gordan coefficients for spin addition"""
         # intermediate spin projection is not allowed to exceed the total spin
         if abs(M) > S:
@@ -220,5 +222,5 @@ class SpinCoupling():
 
 # example
 spinfunc = SpinCoupling()
-path, csfs, csf_coeffs = spinfunc.get_all_csfs(8, 0, 0)
-#spinfunc.print_csfs(path, csfs, csf_coeffs)
+path, csfs, csf_coeffs = spinfunc.get_all_csfs(4, 0, 0)
+spinfunc.print_csfs(path, csfs, csf_coeffs)
