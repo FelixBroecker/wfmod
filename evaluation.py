@@ -457,26 +457,28 @@ class Evaluation:
             csf_coefficients_A, csfs_A, CI_coefficients_A, _ = (
                 self.sCI.read_AMOLQC_csfs(f"{wavefunction_A}.wf", n_electrons)
             )
+            # duplicates are automatically removed in basis of the
+            # transformation matrix
             _, _, determinants_A = self.sCI.get_transformation_matrix(
                 csf_coefficients_A, csfs_A, CI_coefficients_A
             )
 
-        _, determinants_B, CI_coefficients_B, _ = (
-            SelectedCI().read_AMOLQC_csfs(f"{wavefunction_B}.wf", n_electrons)
+        _, determinants_B, CI_coefficients_B, _ = self.sCI.read_AMOLQC_csfs(
+            f"{wavefunction_B}.wf", n_electrons
         )
 
         # sort determinants A
+        dummy = 1
         determinants_A = [
-            self.sCI.sort_determinant(coeff, det)[1]
-            for coeff, det in zip(CI_coefficients_A, determinants_A)
+            self.sCI.sort_determinant(dummy, det)[1] for det in determinants_A
         ]
+
         determinants_B = [
             self.sCI.sort_determinant(coeff, det)[1]
             for coeff, det in zip(CI_coefficients_B, determinants_B)
         ]
 
-        # remove duplicates in determinants A
-        determinants_A = list(set(tuple(det) for det in determinants_A))
+        print(len(determinants_A), "determinants in A")
 
         coeffs_A_from_B = []
         for det_A in determinants_A:
