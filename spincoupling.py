@@ -6,11 +6,11 @@ class SpinCoupling():
     def __init__(self):
         pass
 
-    def sign(self, num):
+    def _sign(self, num):
         """return sign of number"""
         return -1 if num < 0 else (1 if num > 0 else 1)
 
-    def get_permutations(self, x, l, u):
+    def _get_permutations(self, x, l, u):
         """compute all permutations from x in range l to u recursively"""
         def sub(i):
             if i == u:
@@ -59,7 +59,7 @@ class SpinCoupling():
                     res.append(path)
         return res
 
-    def C_plus(self, S, M, sgm):
+    def _C_plus(self, S, M, sgm):
         """Clebsch Gordan coefficients for spin addition"""
         # intermediate spin projection is not allowed to exceed the total spin
         if abs(M) > S:
@@ -70,7 +70,7 @@ class SpinCoupling():
         assert res >= 0, "Square root in computation  of Clebsch Gordan Coefficient cannot be zero."
         return np.sqrt(res)
 
-    def C_minus(self, S, M, sgm):
+    def _C_minus(self, S, M, sgm):
         """Clebsch Gordan coefficients for spin addition"""
         # intermediate spin projection is not allowed to exceed the total spin
         if abs(M) > S:
@@ -81,7 +81,7 @@ class SpinCoupling():
         assert res >= 0, "Square root in computation of Clebsch Gordan Coefficient cannot be zero."
         return -2 * sgm * np.sqrt(res)
 
-    def proj_prim_spin(self, uncoupled, coupled):
+    def _proj_prim_spin(self, uncoupled, coupled):
         """compute contibution of single primitive spin function of csf."""
         n_elec = len(coupled)
 
@@ -112,9 +112,9 @@ class SpinCoupling():
             sgm = uncoupled_ms[i] - ref_uncoupled
             t = coupled_s[i] - ref_coupled
             if t == .5:
-                C = self.C_plus(S, M, sgm)
+                C = self._C_plus(S, M, sgm)
             elif t == -.5:
-                C = self.C_minus(S, M, sgm)
+                C = self._C_minus(S, M, sgm)
 
             # update quantities
             prod *= C
@@ -152,7 +152,7 @@ class SpinCoupling():
         # generate list of involved spins represented by 1 and -1
         spins = []
         n_major = int(S * 2)  # number of majority spins
-        major_spin = int(self.sign(M_s))  # return alpha if S=0 and eliminate
+        major_spin = int(self._sign(M_s))  # return alpha if S=0 and eliminate
                                           # unvalid solution before return
         n_residual = int((N-n_major)/2)  # number of residual spin pairs
         for _ in range(n_major):
@@ -165,7 +165,7 @@ class SpinCoupling():
 
         # get path according to geneological scheme
 
-        perms = self.get_permutations(spins, 0, len(spins))
+        perms = self._get_permutations(spins, 0, len(spins))
         unique_perms = self.remove_duplicates(perms)
         paths = self.check_geneological(unique_perms, major_spin)
 
@@ -178,8 +178,8 @@ class SpinCoupling():
         for i, spin in enumerate(spins):
             if spin == 1:
                 spins[i] = -1
-            if sum(spins)>=0:
-                perms = self.get_permutations(spins, 0, len(spins))
+            if sum(spins) >= 0:
+                perms = self._get_permutations(spins, 0, len(spins))
                 unique_perms = self.remove_duplicates(perms)
                 spin_basis.append(unique_perms)
             else:
@@ -198,7 +198,7 @@ class SpinCoupling():
                 primitives_tmp = []
                 primitive = []
                 for primitive in primitive_spin:
-                    coeff = self.proj_prim_spin(primitive, path)
+                    coeff = self._proj_prim_spin(primitive, path)
 
                     # append coefficients and spin functions if coefficient not 0
 
