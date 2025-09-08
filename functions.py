@@ -13,6 +13,7 @@ class Functions(sCI):
         n_electrons,
         output_wavefunction="",
         verbose=False,
+        coeffs_to_zero=True,
     ):
         """Convert CSF wave function to determinant wave function with a CI guess for the determiants."""
         # TODO multiply prefactors to get correct CI coefficient per determinant
@@ -31,7 +32,8 @@ class Functions(sCI):
         )
 
         CI_coefficients = np.diagonal(CI_coefficients)
-        CI_coefficients = [1 if n == 0 else 0 for n in range(len(dets))]
+        if coeffs_to_zero:
+            CI_coefficients = [1 if n == 0 else 0 for n in range(len(dets))]
         csf_coefficients = []
 
         if verbose:
