@@ -221,6 +221,7 @@ class SpinCoupling():
 
 
 # example
-spinfunc = SpinCoupling()
-path, csfs, csf_coeffs = spinfunc.get_all_csfs(4, 0, 0)
-spinfunc.print_csfs(path, csfs, csf_coeffs)
+if __name__ == "__main__":
+    spinfunc = SpinCoupling()
+    path, csfs, csf_coeffs = spinfunc.get_all_csfs(4, 0, 0)
+    spinfunc.print_csfs(path, csfs, csf_coeffs)
