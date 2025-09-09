@@ -5,7 +5,7 @@ import time
 import numpy as np
 from fractions import Fraction
 from charactertables import CharacterTable
-from wfmod.spin_coupling import SpinCoupling
+from spin_coupling import SpinCoupling
 
 
 # TODO change class name and seperate selected CI part to different class
