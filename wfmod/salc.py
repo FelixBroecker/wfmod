@@ -57,14 +57,7 @@ class SALC:
 
         self.orbital_basisfunctions = {
             "s": ["s1", "s2"],
-            "p": [
-                "px1",
-                "py1",
-                "pz1",
-                "px2",
-                "py2",
-                "pz2",
-            ],
+            "p": ["px1","py1","pz1","px2","py2","pz2",],
         }
         s_orbital_basis = [np.array([1, 0]), np.array([0, 1])]
         p_orbital_basis = [
@@ -264,24 +257,8 @@ class SALC:
             "1 sd''": ["px1 -> -py1", "px2 -> -py2"],
         }
         orb_empty = np.zeros((len(p_orbital_basis), len(p_orbital_basis)))
-        px_reducable_basis = [
-            2,
-            0,
-            0,
-            -2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            -2,
-            -2,
-            2,
-            2,
-        ]
+        px_reducable_basis = [2,0,0,-2,0,0,0,0,0,0,0,0,-2,-2,2,2,]
+
         # convert to transformation matrix
         for mulliken, operations in px_orbs.items():
             px_orbs[mulliken] = self.get_transformation_matrix(
@@ -306,24 +283,7 @@ class SALC:
             "1 sd'": ["py1 -> +px1", "py2 -> +px2"],
             "1 sd''": ["py1 -> -px1", "py2 -> -px2"],
         }
-        py_reducable_basis = [
-            2,
-            0,
-            0,
-            -2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            2,
-            2,
-            -2,
-            -2,
-        ]
+        py_reducable_basis = [2,0,0,-2,0,0,0,0,0,0,0,0,2,2,-2,-2,]
         # convert to transformation matrix
         for mulliken, operations in py_orbs.items():
             py_orbs[mulliken] = self.get_transformation_matrix(
@@ -374,24 +334,7 @@ class SALC:
             "1 sd''": ["pi_x -> -pi_y"],
         }
         orb_empty = np.zeros((len(pi_orbital_basis), len(pi_orbital_basis)))
-        pi_x_u_reducable_basis = [
-            1,
-            0,
-            0,
-            -1,
-            +1,
-            -1,
-            0,
-            0,
-            -1,
-            0,
-            0,
-            1,
-            +1,
-            -1,
-            0,
-            0,
-        ]
+        pi_x_u_reducable_basis = [1,0,0,-1,+1,-1,0,0,-1,0,0,1,+1,-1,0,0,]
         # convert to transformation matrix
         for mulliken, operations in pi_x__u_orbs.items():
             pi_x__u_orbs[mulliken] = self.get_transformation_matrix(
@@ -416,24 +359,7 @@ class SALC:
             "1 sd'": ["pi_y -> +pi_x"],
             "1 sd''": ["pi_y -> -pi_x"],
         }
-        pi_y_u_reducable_basis = [
-            1,
-            0,
-            0,
-            -1,
-            -1,
-            1,
-            0,
-            0,
-            -1,
-            0,
-            0,
-            1,
-            -1,
-            1,
-            0,
-            0,
-        ]
+        pi_y_u_reducable_basis = [1,0,0,-1,-1,1,0,0,-1,0,0,1,-1,1,0,0,]
         # convert to transformation matrix
         for mulliken, operations in pi_y__u_orbs.items():
             pi_y__u_orbs[mulliken] = self.get_transformation_matrix(
@@ -458,24 +384,7 @@ class SALC:
             "1 sd'": ["pi_x -> +pi_y"],
             "1 sd''": ["pi_x -> -pi_y"],
         }
-        pi_x_g_reducable_basis = [
-            1,
-            0,
-            0,
-            -1,
-            1,
-            -1,
-            0,
-            0,
-            +1,
-            0,
-            0,
-            -1,
-            +1,
-            -1,
-            0,
-            0,
-        ]
+        pi_x_g_reducable_basis = [1,0,0,-1,1,-1,0,0,+1,0,0,-1,+1,-1,0,0,]
         # convert to transformation matrix
         for mulliken, operations in pi_x_g_orbs.items():
             pi_x_g_orbs[mulliken] = self.get_transformation_matrix(
@@ -500,24 +409,7 @@ class SALC:
             "1 sd'": ["pi_y -> +pi_x"],
             "1 sd''": ["pi_y -> -pi_x"],
         }
-        pi_y_g_reducable_basis = [
-            1,
-            0,
-            0,
-            -1,
-            -1,
-            1,
-            0,
-            0,
-            +1,
-            0,
-            0,
-            -1,
-            -1,
-            1,
-            0,
-            0,
-        ]
+        pi_y_g_reducable_basis = [1,0,0,-1,-1,1,0,0,+1,0,0,-1,-1,1,0,0,]
         # convert to transformation matrix
         for mulliken, operations in pi_y_g_orbs.items():
             pi_y_g_orbs[mulliken] = self.get_transformation_matrix(
@@ -543,24 +435,7 @@ class SALC:
             "1 sd''": ["dxy1 -> +dxy1", "dxy2 -> +dxy2"],
         }
         orb_empty = np.zeros((len(d_orbital_basis), len(d_orbital_basis)))
-        dxy_reducable_basis = [
-            2,
-            -2,
-            -2,
-            2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            -2,
-            -2,
-            +2,
-            +2,
-        ]
+        dxy_reducable_basis = [2,-2,-2,2,0,0,0,0,0,0,0,0,-2,-2,+2,+2,]
 
         dxz_orbs = {
             "1 E": ["dxz1 -> +dxz1", "dxz2 -> +dxz2"],
@@ -580,24 +455,7 @@ class SALC:
             "1 sd'": ["dxz1 -> +dyz1", "dxz2 -> +dyz2"],
             "1 sd''": ["dxz1 -> -dyz1", "dxz2 -> -dxz2"],
         }
-        dxz_reducable_basis = [
-            2,
-            0,
-            0,
-            -2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            2,
-            -2,
-            +2,
-            -2,
-        ]
+        dxz_reducable_basis = [2,0,0,-2,0,0,0,0,0,0,0,0,2,-2,+2,-2,]
 
         dyz_orbs = {
             "1 E": ["dyz1 -> +dyz1", "dyz2 -> +dyz2"],
@@ -617,24 +475,7 @@ class SALC:
             "1 sd'": ["dyz1 -> +dxz1", "dyz2 -> +dxz2"],
             "1 sd''": ["dyz1 -> -dxz1", "dyz2 -> -dxz2"],
         }
-        dyz_reducable_basis = [
-            2,
-            0,
-            0,
-            -2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            -2,
-            -2,
-            2,
-            2,
-        ]
+        dyz_reducable_basis = [2,0,0,-2,0,0,0,0,0,0,0,0,-2,-2,2,2,]
 
         dxxyy_orbs = {
             "1 E": ["dxxyy1 -> +dxxyy1", "dxxyy2 -> +dxxyy2"],
@@ -654,24 +495,7 @@ class SALC:
             "1 sd'": ["dxxyy1 -> -dxxyy1", "dxxyy2 -> -dxxyy2"],
             "1 sd''": ["dxxyy1 -> -dxxyy1", "dxxyy2 -> -dxxyy2"],
         }
-        dxxyy_reducable_basis = [
-            2,
-            -2,
-            -2,
-            2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            2,
-            2,
-            -2,
-            -2,
-        ]
+        dxxyy_reducable_basis = [2,-2,-2,2,0,0,0,0,0,0,0,0,2,2,-2,-2,]
 
         dzz_orbs = {
             "1 E": ["dzz1 -> +dzz1", "dzz2 -> +dzz2"],
@@ -711,24 +535,7 @@ class SALC:
             "1 sd'": ["dxx1 -> +dyy1", "dxx2 -> +dyy2"],
             "1 sd''": ["dxx1 -> +dyy1", "dxx2 -> +dyy2"],
         }
-        dxx_reducable_basis = [
-            2,
-            0,
-            0,
-            2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            2,
-            2,
-            0,
-            0,
-        ]
+        dxx_reducable_basis = [2,0,0,2,0,0,0,0,0,0,0,0,2,2,0,0,]
 
         dyy_orbs = {
             "1 E": ["dyy1 -> +dyy1", "dyy2 -> +dyy2"],
@@ -748,24 +555,7 @@ class SALC:
             "1 sd'": ["dyy1 -> +dxx1", "dyy2 -> +dxx2"],
             "1 sd''": ["dyy1 -> +dxx1", "dyy2 -> +dxx2"],
         }
-        dyy_reducable_basis = [
-            2,
-            0,
-            0,
-            2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            2,
-            2,
-            0,
-            0,
-        ]
+        dyy_reducable_basis = [2,0,0,2,0,0,0,0,0,0,0,0,2,2,0,0,]
 
         dzz_cart_orbs = {
             "1 E": ["dzz1 -> +dzz1", "dzz2 -> +dzz2"],
@@ -785,24 +575,7 @@ class SALC:
             "1 sd'": ["dzz1 -> +dzz1", "dzz2 -> +dzz2"],
             "1 sd''": ["dzz1 -> +dzz1", "dzz2 -> +dzz2"],
         }
-        dzz_cart_reducable_basis = [
-            2,
-            2,
-            2,
-            2,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            2,
-            2,
-            2,
-            2,
-        ]
+        dzz_cart_reducable_basis = [2,2,2,2,0,0,0,0,0,0,0,0,2,2,2,2,]
         cart_bas = [
             dyz_orbs,
             dxz_orbs,
@@ -906,7 +679,7 @@ class SALC:
                     )
                     tmp += res
                     counter += 1
-                print(tmp)
+                # print(tmp)
 
                 projection = dim / order * tmp
                 if not np.all(projection == 0):
@@ -1068,6 +841,7 @@ class SALC:
                         if same:
                             symmetries[i] = mul
                             break
+        return symmetries
         # print()
         # print(symmetries)
         # print(len(symmetries))
@@ -1108,30 +882,8 @@ if data_set == "c2_sz":
     # C2 in minimal basis
     path = "/home/broecker/research/molecules/c2/pbe0/orca/sto-3g/orca.yaml"
     point_group = "d2h"
-    orbital_basis = [
-        "C1_1s",
-        "C1_2s",
-        "C1_1px",
-        "C1_1py",
-        "C1_1pz",
-        "C2_1s",
-        "C2_2s",
-        "C2_1px",
-        "C2_1py",
-        "C2_1pz",
-    ]
-    orca_reference = [
-        "Ag",
-        "B1u",
-        "Ag",
-        "B1u",
-        "B3u",
-        "B2u",
-        "Ag",
-        "B2g",
-        "B3g",
-        "B1u",
-    ]
+    orbital_basis = ["C1_1s", "C1_2s", "C1_1px", "C1_1py", "C1_1pz", "C2_1s", "C2_2s", "C2_1px", "C2_1py", "C2_1pz"]
+    orca_reference = ["Ag", "B1u", "Ag", "B1u", "B3u", "B2u", "Ag", "B2g", "B3g", "B1u"]
     # parse MO coefficients
     with open(path, "r") as file:
         data = yaml.safe_load(file)
@@ -1141,50 +893,9 @@ elif data_set == "c2_dz":
     # C2 in double zeta
     path = "/home/broecker/research/molecules/c2/pbe0/orca/dzae/orca.yaml"
     point_group = "d2h"
-    orbital_basis = [
-        "C1_1s",
-        "C1_2s",
-        "C1_3s",
-        "C1_4s",
-        "C1_1px",
-        "C1_1py",
-        "C1_1pz",
-        "C1_2px",
-        "C1_2py",
-        "C1_2pz",
-        "C2_1s",
-        "C2_2s",
-        "C2_3s",
-        "C2_4s",
-        "C2_1px",
-        "C2_1py",
-        "C2_1pz",
-        "C2_2px",
-        "C2_2py",
-        "C2_2pz",
-    ]
-    orca_reference = [
-        "Ag",
-        "B1u",
-        "Ag",
-        "B1u",
-        "B2u",
-        "B3u",
-        "Ag",
-        "B2g",
-        "B3g",
-        "B1u",
-        "Ag",
-        "B2u",
-        "B3u",
-        "Ag",
-        "B2g",
-        "B3g",
-        "B1u",
-        "B1u",
-        "Ag",
-        "B1u",
-    ]
+    orbital_basis = ["C1_1s","C1_2s","C1_3s","C1_4s","C1_1px","C1_1py","C1_1pz","C1_2px","C1_2py","C1_2pz","C2_1s","C2_2s","C2_3s","C2_4s","C2_1px","C2_1py","C2_1pz","C2_2px","C2_2py","C2_2pz",    ]
+    orca_reference = ["Ag","B1u","Ag","B1u","B2u","B3u","Ag","B2g","B3g","B1u","Ag","B2u","B3u","Ag","B2g","B3g","B1u","B1u","Ag","B1u"]
+
     # parse MO coefficients
     with open(path, "r") as file:
         data = yaml.safe_load(file)
@@ -1362,7 +1073,7 @@ elif data_set == "c2_tz":
     # parse orca mos
     data = [[] for _ in orbital_basis]
     with open(
-        "/home/broecker/research/molecules/c2/pbe0/orca/tzpae/orca.mkl", "r"
+        "/home/broecker/ma_research/molecules/c2/pbe0/orca/tzpae/orca.mkl", "r"
     ) as reffile:
         found = False
         for line in reffile:
@@ -1391,7 +1102,7 @@ if __name__ == "__main__":
         # parse gamess mos
         counter = 0
         with open(
-            "/home/broecker/research/molecules/c2/pbe0/gamess/gamess.out", "r"
+            "/home/broecker/ma_research/molecules/c2/pbe0/gamess/gamess.out", "r"
         ) as reffile:
             found = False
             for line in reffile:
@@ -1421,9 +1132,16 @@ if __name__ == "__main__":
     )
 
     salc.get_salcs()
-    salc.assign_mo_coefficients(mos)
-    salc.assign_mo_symmetry_species(mos)
-    exit()
+    res = salc.assign_mo_coefficients(mos)
+    print("Mulliken symbols")
+    print(res)
+    print(len(res))
+
+    print()
+    print("Symmetry species")
+    res = salc.assign_mo_symmetry_species(mos)
+    print(res)
+
     print()
     print("Orca reference:")
     print(orca_reference)
