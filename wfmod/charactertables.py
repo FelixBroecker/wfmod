@@ -32,12 +32,19 @@ class CharacterTable:
         return res
 
     def get_reduction(self, representation: list):
-        """"""
+        """
+        Computes the reduction of a reducible representation by applying the
+        great orthogonality theorem (eq. 5.22 Atkins Friedman 2011. Ed. 5;
+        example 5.8).
+
+        Returns a list of contributions of irreps specified in a
+        corresponding list of mulliken labels.
+        """
         g = [int(i.split(" ")[0]) for i in self.operations]
         contributions = []
-        for label, charac in self.characters.items():
+        for charac in self.characters.values():
             assert len(representation) == len(
-                charac
+                    charac
             ), "Length of representation does not match with length of characters."
             contribution = float(
                 sum(
