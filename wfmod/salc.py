@@ -679,7 +679,6 @@ class SALC:
                     )
                     tmp += res
                     counter += 1
-                # print(tmp)
 
                 projection = dim / order * tmp
                 if not np.all(projection == 0):
