@@ -257,7 +257,7 @@ class SALC:
             "1 sd''": ["px1 -> -py1", "px2 -> -py2"],
         }
         orb_empty = np.zeros((len(p_orbital_basis), len(p_orbital_basis)))
-        px_reducable_basis = [2,0,0,-2,0,0,0,0,0,0,0,0,-2,-2,2,2,]
+        px_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, -2, -2, 2, 2]
 
         # convert to transformation matrix
         for mulliken, operations in px_orbs.items():
@@ -890,11 +890,12 @@ class SALC:
         return symmetry_species_res
 
 
+# tests in development stage
 data_set = "c2_tz"
 cartesian = False
 if data_set == "c2_sz":
     # C2 in minimal basis
-    path = "/home/broecker/ma_research/molecules/c2/pbe0/orca/sto-3g/orca.yaml"
+    path = "../docs/orca_sto3g.yaml"
     point_group = "d2h"
     orbital_basis = ["C1_1s", "C1_2s", "C1_1px", "C1_1py", "C1_1pz", "C2_1s", "C2_2s", "C2_1px", "C2_1py", "C2_1pz"]
     orca_reference = ["Ag", "B1u", "Ag", "B1u", "B3u", "B2u", "Ag", "B2g", "B3g", "B1u"]
@@ -905,10 +906,10 @@ if data_set == "c2_sz":
 
 elif data_set == "c2_dz":
     # C2 in double zeta
-    path = "/home/broecker/ma_research/molecules/c2/pbe0/orca/dzae/orca.yaml"
+    path = "../docs/orca_dzae.yaml"
     point_group = "d2h"
-    orbital_basis = ["C1_1s","C1_2s","C1_3s","C1_4s","C1_1px","C1_1py","C1_1pz","C1_2px","C1_2py","C1_2pz","C2_1s","C2_2s","C2_3s","C2_4s","C2_1px","C2_1py","C2_1pz","C2_2px","C2_2py","C2_2pz",    ]
-    orca_reference = ["Ag","B1u","Ag","B1u","B2u","B3u","Ag","B2g","B3g","B1u","Ag","B2u","B3u","Ag","B2g","B3g","B1u","B1u","Ag","B1u"]
+    orbital_basis = ["C1_1s", "C1_2s", "C1_3s", "C1_4s", "C1_1px", "C1_1py", "C1_1pz", "C1_2px", "C1_2py", "C1_2pz", "C2_1s", "C2_2s", "C2_3s", "C2_4s", "C2_1px", "C2_1py", "C2_1pz", "C2_2px", "C2_2py", "C2_2pz"]
+    orca_reference = ["Ag", "B1u", "Ag", "B1u", "B2u", "B3u", "Ag", "B2g", "B3g", "B1u", "Ag", "B2u", "B3u", "Ag", "B2g", "B3g", "B1u", "B1u", "Ag", "B1u"]
 
     # parse MO coefficients
     with open(path, "r") as file:
@@ -916,178 +917,21 @@ elif data_set == "c2_dz":
     mos = data["molecularOrbitals"]["coefficients"].values()
 
 elif data_set == "c2_tz":
-    path = "/home/broecker/ma_research/molecules/c2/pbe0/orca/tzpae/orca.yaml"
+    path = "../docs/orca_tzpae.yaml"
     point_group = "d4h_expanded"
     if not cartesian:
-        orbital_basis = [
-            "C1_1s",
-            "C1_2s",
-            "C1_3s",
-            "C1_4s",
-            "C1_5s",
-            "C1_1px",
-            "C1_1py",
-            "C1_1pz",
-            "C1_2px",
-            "C1_2py",
-            "C1_2pz",
-            "C1_3px",
-            "C1_3py",
-            "C1_3pz",
-            "C1_1dzz",
-            "C1_1dxz",
-            "C1_1dyz",
-            "C1_1dxxyy",
-            "C1_1dxy",
-            "C2_1s",
-            "C2_2s",
-            "C2_3s",
-            "C2_4s",
-            "C2_5s",
-            "C2_1px",
-            "C2_1py",
-            "C2_1pz",
-            "C2_2px",
-            "C2_2py",
-            "C2_2pz",
-            "C2_3px",
-            "C2_3py",
-            "C2_3pz",
-            "C2_1dzz",
-            "C2_1dxz",
-            "C2_1dyz",
-            "C2_1dxxyy",
-            "C2_1dxy",
-        ]
+        orbital_basis = ["C1_1s", "C1_2s", "C1_3s", "C1_4s", "C1_5s", "C1_1px", "C1_1py", "C1_1pz", "C1_2px", "C1_2py", "C1_2pz", "C1_3px", "C1_3py", "C1_3pz", "C1_1dzz", "C1_1dxz", "C1_1dyz", "C1_1dxxyy", "C1_1dxy", "C2_1s", "C2_2s", "C2_3s", "C2_4s", "C2_5s", "C2_1px", "C2_1py", "C2_1pz", "C2_2px", "C2_2py", "C2_2pz", "C2_3px", "C2_3py", "C2_3pz", "C2_1dzz", "C2_1dxz", "C2_1dyz", "C2_1dxxyy", "C2_1dxy"]
     else:
-        orbital_basis = [
-            "C1_1s",
-            "C1_2s",
-            "C1_3s",
-            "C1_4s",
-            "C1_5s",
-            "C1_1px",
-            "C1_1py",
-            "C1_1pz",
-            "C1_2px",
-            "C1_2py",
-            "C1_2pz",
-            "C1_3px",
-            "C1_3py",
-            "C1_3pz",
-            "C1_1dxx",
-            "C1_1dyy",
-            "C1_1dzz",
-            "C1_1dxy",
-            "C1_1dxz",
-            "C1_1dyz",
-            "C2_1s",
-            "C2_2s",
-            "C2_3s",
-            "C2_4s",
-            "C2_5s",
-            "C2_1px",
-            "C2_1py",
-            "C2_1pz",
-            "C2_2px",
-            "C2_2py",
-            "C2_2pz",
-            "C2_3px",
-            "C2_3py",
-            "C2_3pz",
-            "C2_1dxx",
-            "C2_1dyy",
-            "C2_1dzz",
-            "C2_1dxy",
-            "C2_1dxz",
-            "C2_1dyz",
-        ]
-    orca_reference = [
-        "Ag",
-        "B1u",
-        "Ag",
-        "B1u",
-        "B2u",
-        "B3u",
-        "Ag",
-        "B3g",
-        "B2g",
-        "B1u",
-        "B2u",
-        "B3u",
-        "Ag",
-        "B3g",
-        "B2g",
-        "Ag",
-        "B1u",
-        "B1u",
-        "B1g",
-        "Ag",
-        "B2u",
-        "B3u",
-        "Ag",
-        "Au",
-        "B1u",
-        "B3u",
-        "B2u",
-        "B3g",
-        "B2g",
-        "B1u",
-        "B2g",
-        "B3g",
-        "Ag",
-        "B1u",
-        "Ag",
-        "B1u",
-        "Ag",
-        "B1u",
+        orbital_basis = ["C1_1s", "C1_2s", "C1_3s", "C1_4s", "C1_5s", "C1_1px", "C1_1py", "C1_1pz", "C1_2px", "C1_2py", "C1_2pz", "C1_3px", "C1_3py", "C1_3pz", "C1_1dxx", "C1_1dyy", "C1_1dzz", "C1_1dxy", "C1_1dxz", "C1_1dyz", "C2_1s", "C2_2s", "C2_3s", "C2_4s", "C2_5s", "C2_1px", "C2_1py", "C2_1pz", "C2_2px", "C2_2py", "C2_2pz", "C2_3px", "C2_3py", "C2_3pz", "C2_1dxx", "C2_1dyy", "C2_1dzz", "C2_1dxy", "C2_1dxz", "C2_1dyz"]
+    orca_reference = ["Ag", "B1u", "Ag", "B1u", "B2u", "B3u", "Ag", "B3g", "B2g", "B1u", "B2u", "B3u", "Ag", "B3g", "B2g", "Ag", "B1u", "B1u", "B1g", "Ag", "B2u", "B3u", "Ag", "Au", "B1u", "B3u", "B2u", "B3g", "B2g", "B1u", "B2g", "B3g", "Ag", "B1u", "Ag", "B1u", "Ag", "B1u",
     ]
-    gamess_reference = [
-        "A1G",
-        "A2U",
-        "A1G",
-        "A2U",
-        "EU",
-        "EU",
-        "A1G",
-        "EG",
-        "EG",
-        "A2U",
-        "EU",
-        "EU",
-        "A1G",
-        "A1G",
-        "EG",
-        "EG",
-        "A2U",
-        "A2U",
-        "B1G",
-        "B2G",
-        "EU",
-        "EU",
-        "A1G",
-        "B2U",
-        "B1U",
-        "A1G",
-        "EU",
-        "EU",
-        "EG",
-        "EG",
-        "A2U",
-        "A2U",
-        "EG",
-        "EG",
-        "A1G",
-        "A2U",
-        "A1G",
-        "A2U",
-        "A1G",
-        "A2U",
+    gamess_reference = ["A1G", "A2U", "A1G", "A2U", "EU", "EU", "A1G", "EG", "EG", "A2U", "EU", "EU", "A1G", "A1G", "EG", "EG", "A2U", "A2U", "B1G", "B2G", "EU", "EU", "A1G", "B2U", "B1U", "A1G", "EU", "EU", "EG", "EG", "A2U", "A2U", "EG", "EG", "A1G", "A2U", "A1G", "A2U", "A1G", "A2U",
     ]
+
     # parse orca mos
     data = [[] for _ in orbital_basis]
     with open(
-        "/home/broecker/ma_research/molecules/c2/pbe0/orca/tzpae/orca.mkl", "r"
+        "../docs/orca_tzpae.mkl", "r"
     ) as reffile:
         found = False
         for line in reffile:
@@ -1116,7 +960,7 @@ if __name__ == "__main__":
         # parse gamess mos
         counter = 0
         with open(
-            "/home/broecker/ma_research/molecules/c2/pbe0/gamess/gamess.out", "r"
+            "../docs/gamess_tzpae.out", "r"
         ) as reffile:
             found = False
             for line in reffile:
