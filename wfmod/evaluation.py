@@ -481,12 +481,14 @@ class Evaluation:
         print(len(determinants_A), "determinants in A")
 
         coeffs_A_from_B = []
+        counter = 0
         for det_A in determinants_A:
             for coeff_B, det_B in zip(CI_coefficients_B, determinants_B):
                 if det_A == det_B:
                     coeffs_A_from_B.append(coeff_B)
                     break
             else:
+                counter += 1
                 print("Warning: Determinant in A not found in B:", det_A)
 
         sum_up = 0
@@ -496,3 +498,5 @@ class Evaluation:
             "Sum of coefficients of determinants of wavefunction A and its ",
             f"respective coefficients in B: {sum_up:.6f}",
         )
+        if counter:
+            print(counter, "determinants in A not found in B.")
