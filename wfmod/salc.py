@@ -654,7 +654,18 @@ class SALC:
             self.orbital_basis["dzz"] = d_orbital_basis
 
     def get_symmetry_adapted_basis(self, orbital):
-        """get symmetry adapted basis for the given orbitals"""
+        """
+        Get symmetry adapted basis for the given orbitals by computing
+        irreps that contribute to the reducible representation. The projection
+        operator is applied for each contributing irrep to get the basis
+        corresponding to each contributing irrep.
+
+        The function returns the Mulliken label of the contributing irrep and
+        the corresponding symmetry adapted basis as list of numpy arrays.
+        """
+
+        # get irreps by reduction from reducible representation of the spanned
+        # orbital basis
         contributions, mulliken_labels = self.characTab.get_reduction(
             self.spanned_basis[orbital]
         )
@@ -663,7 +674,11 @@ class SALC:
 
         mulliken_label_res = []
         projection_res = []
-        # get symmetry adapted basis with projection operator
+
+        # get symmetry adapted basis by applying the projection operator for
+        # each contributing irrep
+        # (eq. 5.24 Atkins Friedman 2011. Ed. 5; Example 5.9)
+
         for contribution, label in zip(contributions, mulliken_labels):
             if contribution != 0:
                 dim = self.characTab.get_dimension(label)
@@ -739,14 +754,14 @@ class SALC:
                 orb_xyz.append(orb_species)
         for orb in orb_xyz:
             lab, op = self.get_symmetry_adapted_basis(orb)
-            for l, o in zip(lab, op):
-                if l not in self.proj_results:
-                    self.proj_results[l] = {
+            for label, operation in zip(lab, op):
+                if label not in self.proj_results:
+                    self.proj_results[label] = {
                         "labels": [],
                         "operations": [],
                     }
-                self.proj_results[l]["labels"].append(orb)
-                self.proj_results[l]["operations"].append(o)
+                self.proj_results[label]["labels"].append(orb)
+                self.proj_results[label]["operations"].append(operation)
         # construct for each reducible representation the salcs as
         # linear combination
         # TODO write this section more elegant and readable
@@ -761,7 +776,7 @@ class SALC:
                 deg = True
                 summands_x = []
                 summands_y = []
-            # print(data["operations"])
+
             for orb, idx in orb_idx.items():
                 for label, operation in zip(
                     data["labels"], data["operations"]
@@ -879,7 +894,7 @@ data_set = "c2_tz"
 cartesian = False
 if data_set == "c2_sz":
     # C2 in minimal basis
-    path = "/home/broecker/research/molecules/c2/pbe0/orca/sto-3g/orca.yaml"
+    path = "/home/broecker/ma_research/molecules/c2/pbe0/orca/sto-3g/orca.yaml"
     point_group = "d2h"
     orbital_basis = ["C1_1s", "C1_2s", "C1_1px", "C1_1py", "C1_1pz", "C2_1s", "C2_2s", "C2_1px", "C2_1py", "C2_1pz"]
     orca_reference = ["Ag", "B1u", "Ag", "B1u", "B3u", "B2u", "Ag", "B2g", "B3g", "B1u"]
@@ -890,7 +905,7 @@ if data_set == "c2_sz":
 
 elif data_set == "c2_dz":
     # C2 in double zeta
-    path = "/home/broecker/research/molecules/c2/pbe0/orca/dzae/orca.yaml"
+    path = "/home/broecker/ma_research/molecules/c2/pbe0/orca/dzae/orca.yaml"
     point_group = "d2h"
     orbital_basis = ["C1_1s","C1_2s","C1_3s","C1_4s","C1_1px","C1_1py","C1_1pz","C1_2px","C1_2py","C1_2pz","C2_1s","C2_2s","C2_3s","C2_4s","C2_1px","C2_1py","C2_1pz","C2_2px","C2_2py","C2_2pz",    ]
     orca_reference = ["Ag","B1u","Ag","B1u","B2u","B3u","Ag","B2g","B3g","B1u","Ag","B2u","B3u","Ag","B2g","B3g","B1u","B1u","Ag","B1u"]
@@ -901,7 +916,7 @@ elif data_set == "c2_dz":
     mos = data["molecularOrbitals"]["coefficients"].values()
 
 elif data_set == "c2_tz":
-    path = "/home/broecker/research/molecules/c2/pbe0/orca/tzpae/orca.yaml"
+    path = "/home/broecker/ma_research/molecules/c2/pbe0/orca/tzpae/orca.yaml"
     point_group = "d4h_expanded"
     if not cartesian:
         orbital_basis = [
