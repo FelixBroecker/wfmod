@@ -64,7 +64,7 @@ class Functions(sCI):
         """Cut wavefunction after split_at."""
         csf_coefficients, determiants, CI_coefficients, wfpretext = (
             self.read_AMOLQC_csfs(
-                f"{input_wavefunction}.wf", n_electrons, wftype=wftype
+                f"{input_wavefunction}.wf", n_electrons, wftype=wftype, split_at=split_at, verbose=verbose
             )
         )
 
