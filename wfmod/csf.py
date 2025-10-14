@@ -70,7 +70,7 @@ class SelectedCI:
             with open(file_name, "w") as printfile:
                 printfile.write(out)
 
-    def read_AMOLQC_csfs(self, filename, n_elec, wftype="csf", verbose=False):
+    def read_AMOLQC_csfs(self, filename, n_elec, split_at=0, wftype="csf", verbose=False):
         """read in csfs of AMOLQC format with CI coefficients"""
         csf_coefficients = []
         csfs = []
@@ -143,6 +143,9 @@ class SelectedCI:
                                 csf_tmp = []
                                 if csf_counter == n_csfs:
                                     break
+                                elif split_at and csf_counter == split_at:
+                                    break
+
                     if found_det:
                         det_counter += 1
                         entries = line.split()
@@ -155,6 +158,8 @@ class SelectedCI:
                                 det.append(-1 * int(entries[i]))
                         csfs.append(det.copy())
                         if det_counter == n_dets:
+                            break
+                        elif split_at and det_counter == split_at:
                             break
         except FileNotFoundError:
             if verbose:
