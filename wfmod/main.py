@@ -7,8 +7,6 @@ from pyscript import *  # requirement pyscript as python package https://github.
 from csf import SelectedCI
 from automation import Automation
 from evaluation import Evaluation
-from utils import Utils
-from cipsi_jas import AddSingles
 from functions import Functions
 
 sCI = SelectedCI()
@@ -38,8 +36,6 @@ def main():
         "SelectedCI": SelectedCI,
         "Automation": Automation,
         "Evaluation": Evaluation,
-        "Utils": Utils,
-        "AddSingles": AddSingles,
     }
 
     # print header
