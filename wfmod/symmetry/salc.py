@@ -2,6 +2,7 @@ import numpy as np
 import re
 import yaml
 from wfmod.charactertables import CharacterTable
+from wfmod.symmetry.transformations import Transformations
 
 
 class SALC:
@@ -28,6 +29,82 @@ class SALC:
         elif self.point_group == "d4h_expanded":
             self.load_d4h_matrices()
 
+    def load_d2h_matrices(self):
+        """load the opertion matrices for linear diatomics for
+        s, px, py, pz orbitals."""
+        transformations = Transformations.get_d2h_matrices()
+
+        self.operation_matrices["s"] = transformations["operation_matrices"]["s"]
+        self.operation_matrices["px"] = transformations["operation_matrices"]["px"]
+        self.operation_matrices["py"] = transformations["operation_matrices"]["py"]
+        self.operation_matrices["pz"] = transformations["operation_matrices"]["pz"]
+        self.spanned_basis["s"] = transformations["spanned_basis"]["s"]
+        self.spanned_basis["px"] = transformations["spanned_basis"]["px"]
+        self.spanned_basis["py"] = transformations["spanned_basis"]["py"]
+        self.spanned_basis["pz"] = transformations["spanned_basis"]["pz"]
+        self.orbital_basis["s"] = transformations["orbital_basis"]["s"]
+        self.orbital_basis["px"] = transformations["orbital_basis"]["px"]
+        self.orbital_basis["py"] = transformations["orbital_basis"]["py"]
+        self.orbital_basis["pz"] = transformations["orbital_basis"]["pz"]
+
+    def load_d4h_matrices(self):
+        """load the opertion matrices for linear diatomics for
+        s, px, py, pz, dxy, dxz, dyz, dx2-y2, dz2 orbitals."""
+        transformations = Transformations.get_d4h_matrices(self.cartesian)
+
+        self.operation_matrices["s"] = transformations["operation_matrices"]["s"]
+        self.operation_matrices["px"] = transformations["operation_matrices"]["px"]
+        self.operation_matrices["py"] = transformations["operation_matrices"]["py"]
+        self.operation_matrices["pz"] = transformations["operation_matrices"]["pz"]
+        self.operation_matrices["pi_x_u"] = transformations["operation_matrices"]["pi_x_u"]
+        self.operation_matrices["pi_y_u"] = transformations["operation_matrices"]["pi_y_u"]
+        self.operation_matrices["pi_x_g"] = transformations["operation_matrices"]["pi_x_g"]
+        self.operation_matrices["pi_y_g"] = transformations["operation_matrices"]["pi_y_g"]
+        self.operation_matrices["dxy"] = transformations["operation_matrices"]["dxy"]
+        self.operation_matrices["dxz"] = transformations["operation_matrices"]["dxz"]
+        self.operation_matrices["dyz"] = transformations["operation_matrices"]["dyz"]
+        if self.cartesian:
+            self.operation_matrices["dxx"] = transformations["operation_matrices"]["dxx"]
+            self.operation_matrices["dyy"] = transformations["operation_matrices"]["dyy"]
+            self.operation_matrices["dzz"] = transformations["operation_matrices"]["dzz"]
+        else:
+            self.operation_matrices["dxxyy"] = transformations["operation_matrices"]["dxxyy"]
+            self.operation_matrices["dzz"] = transformations["operation_matrices"]["dzz"]
+        self.spanned_basis["s"] = transformations["spanned_basis"]["s"]
+        self.spanned_basis["px"] = transformations["spanned_basis"]["px"]
+        self.spanned_basis["py"] = transformations["spanned_basis"]["py"]
+        self.spanned_basis["pz"] = transformations["spanned_basis"]["pz"]
+        self.spanned_basis["pi_x_u"] = transformations["spanned_basis"]["pi_x_u"]
+        self.spanned_basis["pi_y_u"] = transformations["spanned_basis"]["pi_y_u"]
+        self.spanned_basis["pi_x_g"] = transformations["spanned_basis"]["pi_x_g"]
+        self.spanned_basis["pi_y_g"] = transformations["spanned_basis"]["pi_y_g"]
+        self.spanned_basis["dxy"] = transformations["spanned_basis"]["dxy"]
+        self.spanned_basis["dxz"] = transformations["spanned_basis"]["dxz"]
+        self.spanned_basis["dyz"] = transformations["spanned_basis"]["dyz"]
+        if self.cartesian:
+            self.spanned_basis["dxx"] = transformations["spanned_basis"]["dxx"]
+            self.spanned_basis["dyy"] = transformations["spanned_basis"]["dyy"]
+            self.spanned_basis["dzz"] = transformations["spanned_basis"]["dzz"]
+        else:
+            self.spanned_basis["dxxyy"] = transformations["spanned_basis"]["dxxyy"]
+            self.spanned_basis["dzz"] = transformations["spanned_basis"]["dzz"]
+        self.orbital_basis["s"] = transformations["orbital_basis"]["s"]
+        self.orbital_basis["px"] = transformations["orbital_basis"]["px"]
+        self.orbital_basis["py"] = transformations["orbital_basis"]["py"]
+        self.orbital_basis["pz"] = transformations["orbital_basis"]["pz"]
+        self.orbital_basis["pi_x"] = transformations["orbital_basis"]["pi_x"]
+        self.orbital_basis["pi_y"] = transformations["orbital_basis"]["pi_y"]
+        self.orbital_basis["pi"] = transformations["orbital_basis"]["pi"]
+        self.orbital_basis["dxy"] = transformations["orbital_basis"]["dxy"]
+        self.orbital_basis["dxz"] = transformations["orbital_basis"]["dxz"]
+        self.orbital_basis["dyz"] = transformations["orbital_basis"]["dyz"]
+        if self.cartesian:
+            self.orbital_basis["dxx"] = transformations["orbital_basis"]["dxx"]
+            self.orbital_basis["dyy"] = transformations["orbital_basis"]["dyy"]
+            self.orbital_basis["dzz"] = transformations["orbital_basis"]["dzz"]
+        else:
+            self.orbital_basis["dxxyy"] = transformations["orbital_basis"]["dxxyy"]
+            self.orbital_basis["dzz"] = transformations["orbital_basis"]["dzz"]
 
     def get_symmetry_adapted_basis(self, orbital):
         """
