@@ -7,7 +7,7 @@ from pyscript import *  # requirement pyscript as python package https://github.
 from csf import SelectedCI
 from automation import Automation
 from evaluation import Evaluation
-from utils import Utils
+from wfmod.old.utils import Utils
 from cipsi_jas import AddSingles
 from functions import Functions
 
