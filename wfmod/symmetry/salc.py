@@ -170,8 +170,6 @@ class SALC:
         res = []
         # iterate over atomic orbitals in product of atomic orbitals
         for fac in prod:
-            print("Proceed factor:", fac)
-
 
             spherical_harmonic, _ = self.get_spherical_harmonic(fac)
 
@@ -192,13 +190,10 @@ class SALC:
             # now apply projection operator on this basis function
             tmp_res = []
             for _, operation_symbol in enumerate(self.characTab.operations):
-                print(operation_symbol)
                 dot = np.dot(
                     self.operation_matrices[spherical_harmonic][operation_symbol].T,
                     basis_function,
                 ) * int(operation_symbol.split()[0])
-                ao_name = self.get_ao_name(dot, angular_momentum)
-                print("ao name:", ao_name)
                 tmp_res.append(dot)
             res.append(tmp_res)
         return res
