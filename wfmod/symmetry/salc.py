@@ -159,15 +159,19 @@ class SALC:
                     projection_res.append(projection)
         return mulliken_label_res, projection_res
 
-    def apply_symmetry_operator_on_product(self, prod: list, inversion: str = ""):
+    def apply_symmetry_operator_on_product(self, prod: list):
         """
         Returns the product of basis functions for each irrep after applying
         the symmetry operations.
         """
-
+        res = []
+        # iterate over atomic orbitals in product of atomic orbitals
         for fac in prod:
-            print("fac:", fac)
+            print("Proceed factor:", fac)
+
+
             spherical_harmonic, _ = self.get_spherical_harmonic(fac)
+
             # get l type of the orbitals
             angular_momentum = ""
             for l_type in self.orbital_basisfunctions.keys():
@@ -175,56 +179,26 @@ class SALC:
                     angular_momentum = l_type
                     break
             assert angular_momentum, f"Could not find angular momentum (s, p, d ...)type for {fac}"
-            print("angular momentum:", angular_momentum)
 
             # get index of respective basis_function
-            print("basis functions:", self.orbital_basisfunctions)
             index = self.orbital_basisfunctions[angular_momentum].index(fac)
-            print("index in angular momentum list:", index)
 
             # get representation of orbital input in basis function
             basis_function = self.orbital_basis[angular_momentum][index]
-            print("basis function:", basis_function)
 
             # now apply projection operator on this basis function
-            for i, operation_symbol in enumerate(self.characTab.operations):
+            tmp_res = []
+            for _, operation_symbol in enumerate(self.characTab.operations):
                 print(operation_symbol)
                 dot = np.dot(
                     self.operation_matrices[spherical_harmonic][operation_symbol].T,
                     basis_function,
                 ) * int(operation_symbol.split()[0])
-                print(dot)
-            print(self.orbital_basisfunctions)
-            self.get_ao_name(basis_function, angular_momentum)
-            return
-
-
-        operation_results = []
-        for i, operation_symbol in enumerate(self.characTab.operations):
-            print(operation_symbol)
-            print("HERE")
-            print(self.operation_matrices[fac][operation_symbol])
-            print(self.orbital_basis[fac])
-
-            return
-            tmp_res = []
-            for func in prod:
-                # get index of respective basis_function
-                index = next(
-                    j
-                    for j, arr in enumerate(basis_functions)
-                    if np.array_equal(arr, func)
-                )
-                dot = np.dot(
-                    self.operation_matrices[lab][operation_symbol],
-                    basis_functions,
-                ) * int(operation_symbol.split()[0])
-                # do not append the zero vector
-                for arr in dot:
-                    if np.any(arr):
-                        tmp_res.append(arr)
-            operation_results.append(tmp_res)
-        return operation_results
+                ao_name = self.get_ao_name(dot, angular_momentum)
+                print("ao name:", ao_name)
+                tmp_res.append(dot)
+            res.append(tmp_res)
+        return res
 
     def apply_symmetry_operator_on_product_pi(self, prod: list, inversion: str = ""):
         """
