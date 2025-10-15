@@ -27,19 +27,25 @@ class MOProduct(SALC):
         for tup in res:
             tmp = ()
             for idx in tup:
-                print(self.basis[idx])
-                tmp += (self.basis[idx],)
+                print(self.mo_basis[idx])
+                tmp += (self.mo_basis[idx],)
             products_in_input_basis.append(tmp)
         print(products_in_input_basis)
 
         # apply symmetry operator to each factor of each product
         # as example do for first product
         product = products_in_input_basis[0]
+        print(product)
+        res = []
         for factor in product:
-            print(factor)
-            sph_harmonic = self.get_spherical_harmonic(factor)
-            mulliken, projection = self.get_symmetry_adapted_basis(sph_harmonic)
-            print(mulliken, projection)
+            ao, location = self.get_spherical_harmonic(factor)
+            res.append(ao + location)
+
+        print(res)
+        print()
+
+        print("Applying symmetry operators to product:")
+        self.apply_symmetry_operator_on_product(res)
 
 
         print()
