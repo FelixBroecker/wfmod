@@ -193,10 +193,41 @@ class SALC:
             operation_results.append(tmp_res)
         return operation_results
 
-    def get_salcs(self):
-        """"""
+    def get_idx_in_basis(self, label, func):
+        """Get the index of a basis function in the basis list."""
+        # check at which postion the orbital is in the basis
+        for func in self.orbital_basisfunctions.values():
+            for i, f in enumerate(func):
+                if label in f:
+                    j = i
+                    break
+
+    def get_spherical_harmonic(self, ao):
+        """Gets from input AOs the pure spherical harmonic e.g. pz from C2_2pz"""
+        ao = ao.split("_")[-1]
+        orb_species = re.search(r"\d+(\D+)", ao).group(1)
+        return orb_species
+
+    def get_indices_of_same_basis(self,):
+        """Get indices of basis functions that are the same but on different atoms."""
         orb_idx = {}
         orb_xyz = []
+        # count number of different orbitals and save indices
+        for i, orb in enumerate(self.basis):
+            ao = orb.split("_")[-1]
+            if ao not in orb_idx:
+                orb_idx[ao] = []
+            orb_idx[ao].append(i)
+
+            # get the different orbital species in terms of angular momentum l
+            orb_species = re.search(r"\d+(\D+)", ao).group(1)
+            if orb_species not in orb_xyz:
+                orb_xyz.append(orb_species)
+        return orb_idx, orb_xyz
+
+    def get_salcs(self):
+        """"""
+        orb_idx, orb_xyz = self.get_indices_of_same_basis()
         # count number of different orbitals and save indices
         for i, orb in enumerate(self.basis):
             ao = orb.split("_")[-1]
