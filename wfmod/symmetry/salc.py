@@ -10,7 +10,7 @@ class SALC:
         """"""
         self.point_group = point_group
         self.characTab = CharacterTable(point_group)
-        self.basis = basis
+        self.mo_basis = basis
         self.cartesian = cartesian
         self.operation_matrices: dict[str, list] = {}
         self.spanned_basis: dict[str, list] = {}
@@ -43,6 +43,7 @@ class SALC:
         self.spanned_basis["py"] = transformations["spanned_basis"]["py"]
         self.spanned_basis["pz"] = transformations["spanned_basis"]["pz"]
         self.orbital_basis["s"] = transformations["orbital_basis"]["s"]
+        self.orbital_basis["p"] = transformations["orbital_basis"]["px"] # add basis also for general p
         self.orbital_basis["px"] = transformations["orbital_basis"]["px"]
         self.orbital_basis["py"] = transformations["orbital_basis"]["py"]
         self.orbital_basis["pz"] = transformations["orbital_basis"]["pz"]
@@ -93,6 +94,7 @@ class SALC:
         self.orbital_basis["px"] = transformations["orbital_basis"]["px"]
         self.orbital_basis["py"] = transformations["orbital_basis"]["py"]
         self.orbital_basis["pz"] = transformations["orbital_basis"]["pz"]
+        self.orbital_basis["p"] = transformations["orbital_basis"]["px"] # add basis also for general p
         self.orbital_basis["pi_x"] = transformations["orbital_basis"]["pi_x"]
         self.orbital_basis["pi_y"] = transformations["orbital_basis"]["pi_y"]
         self.orbital_basis["pi"] = transformations["orbital_basis"]["pi"]
@@ -157,7 +159,74 @@ class SALC:
                     projection_res.append(projection)
         return mulliken_label_res, projection_res
 
-    def apply_symmetry_operator_on_product(self, prod, inversion=""):
+    def apply_symmetry_operator_on_product(self, prod: list, inversion: str = ""):
+        """
+        Returns the product of basis functions for each irrep after applying
+        the symmetry operations.
+        """
+
+        for fac in prod:
+            print("fac:", fac)
+            spherical_harmonic, _ = self.get_spherical_harmonic(fac)
+            # get l type of the orbitals
+            angular_momentum = ""
+            for l_type in self.orbital_basisfunctions.keys():
+                if l_type in fac:
+                    angular_momentum = l_type
+                    break
+            assert angular_momentum, f"Could not find angular momentum (s, p, d ...)type for {fac}"
+            print("angular momentum:", angular_momentum)
+
+            # get index of respective basis_function
+            print("basis functions:", self.orbital_basisfunctions)
+            index = self.orbital_basisfunctions[angular_momentum].index(fac)
+            print("index in angular momentum list:", index)
+
+            # get representation of orbital input in basis function
+            basis_function = self.orbital_basis[angular_momentum][index]
+            print("basis function:", basis_function)
+
+            # now apply projection operator on this basis function
+            for i, operation_symbol in enumerate(self.characTab.operations):
+                print(operation_symbol)
+                dot = np.dot(
+                    self.operation_matrices[spherical_harmonic][operation_symbol].T,
+                    basis_function,
+                ) * int(operation_symbol.split()[0])
+                print(dot)
+            print(self.orbital_basisfunctions)
+            self.get_ao_name(basis_function, angular_momentum)
+            return
+
+
+        operation_results = []
+        for i, operation_symbol in enumerate(self.characTab.operations):
+            print(operation_symbol)
+            print("HERE")
+            print(self.operation_matrices[fac][operation_symbol])
+            print(self.orbital_basis[fac])
+
+            return
+            tmp_res = []
+            for func in prod:
+                # get index of respective basis_function
+                index = next(
+                    j
+                    for j, arr in enumerate(basis_functions)
+                    if np.array_equal(arr, func)
+                )
+                dot = np.dot(
+                    self.operation_matrices[lab][operation_symbol],
+                    basis_functions,
+                ) * int(operation_symbol.split()[0])
+                # do not append the zero vector
+                for arr in dot:
+                    if np.any(arr):
+                        tmp_res.append(arr)
+            operation_results.append(tmp_res)
+        return operation_results
+
+    def apply_symmetry_operator_on_product_pi(self, prod: list, inversion: str = ""):
         """
         Returns the product of basis functions for each irrep after applying
         the symmetry operations.
@@ -202,18 +271,36 @@ class SALC:
                     j = i
                     break
 
+    def get_ao_name(self, basis_function, angular_momentum):
+        "Get the ao name from the basis function e.g. [1, 0] -> +1s]"
+        basis = self.orbital_basisfunctions[angular_momentum]
+        for function_value, string_rep in zip(basis_function, basis):
+            if function_value != 0:
+                sgn = ""
+                if np.sign(function_value) == 1:
+                    sgn = "+"
+                else:
+                    sgn = "-"
+                return sgn + string_rep
+
     def get_spherical_harmonic(self, ao):
         """Gets from input AOs the pure spherical harmonic e.g. pz from C2_2pz"""
-        ao = ao.split("_")[-1]
-        orb_species = re.search(r"\d+(\D+)", ao).group(1)
-        return orb_species
+        try:
+            orb_species = re.search(r"[A-Za-z]+", ao.split("_")[-1]).group(0)
+        except AttributeError:
+            orb_species = None
+        try:
+            location = re.search(r"\d+", ao.split("_")[0]).group()
+        except AttributeError:
+            location = None
+        return orb_species, location
 
     def get_indices_of_same_basis(self,):
         """Get indices of basis functions that are the same but on different atoms."""
         orb_idx = {}
         orb_xyz = []
         # count number of different orbitals and save indices
-        for i, orb in enumerate(self.basis):
+        for i, orb in enumerate(self.mo_basis):
             ao = orb.split("_")[-1]
             if ao not in orb_idx:
                 orb_idx[ao] = []
@@ -229,7 +316,7 @@ class SALC:
         """"""
         orb_idx, orb_xyz = self.get_indices_of_same_basis()
         # count number of different orbitals and save indices
-        for i, orb in enumerate(self.basis):
+        for i, orb in enumerate(self.mo_basis):
             ao = orb.split("_")[-1]
             if ao not in orb_idx:
                 orb_idx[ao] = []
@@ -252,7 +339,7 @@ class SALC:
         # construct for each reducible representation the salcs as
         # linear combination
         # TODO write this section more elegant and readable
-        lst = [0 for _ in self.basis]
+        lst = [0 for _ in self.mo_basis]
         for mulliken, data in self.proj_results.items():
             summands = []
             # seperate summands if degenerate
@@ -369,7 +456,7 @@ class SALC:
             for i, contribution in enumerate(mo):
                 if contribution:
                     orb_species = re.search(
-                        r"\d+(\D+)", self.basis[i].split("_")[-1]
+                        r"\d+(\D+)", self.mo_basis[i].split("_")[-1]
                     ).group(1)
                     for key, symm in symmetry_species_bas.items():
                         symm["found_all"] = orb_species in symm["orb"]
