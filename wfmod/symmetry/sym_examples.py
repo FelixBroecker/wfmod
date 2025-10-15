@@ -40,10 +40,8 @@ if __name__ == "__main__":
             orbital_basis = ["C1_1s", "C1_2s", "C1_3s", "C1_4s", "C1_5s", "C1_1px", "C1_1py", "C1_1pz", "C1_2px", "C1_2py", "C1_2pz", "C1_3px", "C1_3py", "C1_3pz", "C1_1dzz", "C1_1dxz", "C1_1dyz", "C1_1dxxyy", "C1_1dxy", "C2_1s", "C2_2s", "C2_3s", "C2_4s", "C2_5s", "C2_1px", "C2_1py", "C2_1pz", "C2_2px", "C2_2py", "C2_2pz", "C2_3px", "C2_3py", "C2_3pz", "C2_1dzz", "C2_1dxz", "C2_1dyz", "C2_1dxxyy", "C2_1dxy"]
         else:
             orbital_basis = ["C1_1s", "C1_2s", "C1_3s", "C1_4s", "C1_5s", "C1_1px", "C1_1py", "C1_1pz", "C1_2px", "C1_2py", "C1_2pz", "C1_3px", "C1_3py", "C1_3pz", "C1_1dxx", "C1_1dyy", "C1_1dzz", "C1_1dxy", "C1_1dxz", "C1_1dyz", "C2_1s", "C2_2s", "C2_3s", "C2_4s", "C2_5s", "C2_1px", "C2_1py", "C2_1pz", "C2_2px", "C2_2py", "C2_2pz", "C2_3px", "C2_3py", "C2_3pz", "C2_1dxx", "C2_1dyy", "C2_1dzz", "C2_1dxy", "C2_1dxz", "C2_1dyz"]
-        orca_reference = ["Ag", "B1u", "Ag", "B1u", "B2u", "B3u", "Ag", "B3g", "B2g", "B1u", "B2u", "B3u", "Ag", "B3g", "B2g", "Ag", "B1u", "B1u", "B1g", "Ag", "B2u", "B3u", "Ag", "Au", "B1u", "B3u", "B2u", "B3g", "B2g", "B1u", "B2g", "B3g", "Ag", "B1u", "Ag", "B1u", "Ag", "B1u",
-        ]
-        gamess_reference = ["A1G", "A2U", "A1G", "A2U", "EU", "EU", "A1G", "EG", "EG", "A2U", "EU", "EU", "A1G", "A1G", "EG", "EG", "A2U", "A2U", "B1G", "B2G", "EU", "EU", "A1G", "B2U", "B1U", "A1G", "EU", "EU", "EG", "EG", "A2U", "A2U", "EG", "EG", "A1G", "A2U", "A1G", "A2U", "A1G", "A2U",
-        ]
+        orca_reference = ["Ag", "B1u", "Ag", "B1u", "B2u", "B3u", "Ag", "B3g", "B2g", "B1u", "B2u", "B3u", "Ag", "B3g", "B2g", "Ag", "B1u", "B1u", "B1g", "Ag", "B2u", "B3u", "Ag", "Au", "B1u", "B3u", "B2u", "B3g", "B2g", "B1u", "B2g", "B3g", "Ag", "B1u", "Ag", "B1u", "Ag", "B1u",]
+        gamess_reference = ["A1G", "A2U", "A1G", "A2U", "EU", "EU", "A1G", "EG", "EG", "A2U", "EU", "EU", "A1G", "A1G", "EG", "EG", "A2U", "A2U", "B1G", "B2G", "EU", "EU", "A1G", "B2U", "B1U", "A1G", "EU", "EU", "EG", "EG", "A2U", "A2U", "EG", "EG", "A1G", "A2U", "A1G", "A2U", "A1G", "A2U",]
 
         # parse orca mos
         data = [[] for _ in orbital_basis]
