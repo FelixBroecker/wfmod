@@ -131,5 +131,6 @@ if __name__ == "__main__":
         print()
 
     # test mo products
-    moProd = MOProduct()
+    moProd = MOProduct(point_group,orbital_basis,cartesian=cartesian)
     moProd.print_mos(mos[4], mos[5])
+    prod = moProd.get_mo_product(mos[4], mos[5])
