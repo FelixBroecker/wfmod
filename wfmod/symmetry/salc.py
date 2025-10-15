@@ -159,10 +159,13 @@ class SALC:
                     projection_res.append(projection)
         return mulliken_label_res, projection_res
 
-    def apply_symmetry_operator_on_product(self, prod: list):
+    def apply_symmetry_operator_on_product(self, prod: list) -> list:
         """
-        Returns the product of basis functions for each irrep after applying
+        Computes the product of basis functions for each irrep after applying
         the symmetry operations.
+
+        Returns a list with the resulting projections for each factor (ao) of
+        the product.
         """
         res = []
         # iterate over atomic orbitals in product of atomic orbitals
