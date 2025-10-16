@@ -418,7 +418,7 @@ class Transformations:
             "1 sv'": ["dxz1 -> +dxz1", "dxz2 -> +dxz2"],
             "1 sv''": ["dxz1 -> -dxz1", "dxz2 -> -dxz2"],
             "1 sd'": ["dxz1 -> +dyz1", "dxz2 -> +dyz2"],
-            "1 sd''": ["dxz1 -> -dyz1", "dxz2 -> -dxz2"],
+            "1 sd''": ["dxz1 -> -dyz1", "dxz2 -> -dyz2"],
         }
         dxz_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, +2, -2]
 
