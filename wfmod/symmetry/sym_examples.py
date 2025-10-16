@@ -132,4 +132,27 @@ if __name__ == "__main__":
     moProd = MOProduct(point_group, orbital_basis, cartesian=cartesian)
     print("mo")
     print(mos[5])
-    prod = moProd.get_mo_product([mos[5], mos[5]])
+    prod, labels = moProd.get_projection_of_mo_product([mos[5], mos[5]])
+
+    moProd.assign_ao_products_to_mos(prod, labels, [mos[4], mos[5]])
+
+    exit()
+    # test for identical terms in mo product
+    test1 = [
+        [np.array([0., 0., 0., 0., 0., 0., 1., 0., 0., 0.]), np.array([0., 0., 0., 1., 0., 0.])],
+        [np.array([0., 0., 0., 0., 0., 0., 1., 0., 0., 0.]), np.array([0., 0., 0., 1., 0., 0.])],
+    ]
+    test2 = [
+        [np.array([0., 0., 0., 0., 0., 0., 1., 0., 0., 0.]), np.array([0., 0., 0., 1., 0., 0.])],
+        [np.array([0., 0., 0., 0., 0., 0., -1., 0., 0., 0.]), np.array([0., 0., 0., 1., 0., 0.])],
+    ]
+    test3 = [
+        [np.array([0., 0., 0., 0., 0., 0., 1., 0., 0., 0.]), np.array([0., 0., 0., 1., 0., 0.])],
+        [np.array([0., 0., 0., 0., 0., 0., -1., 0., 0., 0.]), np.array([0., 0., 0., -1., 0., 0.])],
+    ]
+    test3 = [
+        [np.array([0., 0., 0., 0., 0., 0., -1., 0., 0., 0.]), np.array([0., 0., 0., 1., 0., 0.])],
+        [np.array([0., 0., 0., 0., 0., 0., -1., 0., 0., 0.]), np.array([0., 0., 0., -1., 0., 0.])],
+    ]
+    res = moProd.sum_identical_terms(test3)
+    print(res)
