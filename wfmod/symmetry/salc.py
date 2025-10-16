@@ -105,9 +105,11 @@ class SALC:
             self.orbital_basis["dxx"] = transformations["orbital_basis"]["dxx"]
             self.orbital_basis["dyy"] = transformations["orbital_basis"]["dyy"]
             self.orbital_basis["dzz"] = transformations["orbital_basis"]["dzz"]
+            self.orbital_basis["d"] = transformations["orbital_basis"]["dzz"]
         else:
             self.orbital_basis["dxxyy"] = transformations["orbital_basis"]["dxxyy"]
             self.orbital_basis["dzz"] = transformations["orbital_basis"]["dzz"]
+            self.orbital_basis["d"] = transformations["orbital_basis"]["dzz"]
         self.orbital_basisfunctions = transformations["basis_functions"]
 
 
@@ -159,7 +161,7 @@ class SALC:
                     projection_res.append(projection)
         return mulliken_label_res, projection_res
 
-    def apply_symmetry_operator_on_product(self, prod: list) -> list:
+    def apply_symmetry_operator_on_product(self, prod: list, irrep: str) -> list:
         """
         Computes the product of basis functions for each irrep after applying
         the symmetry operations.
@@ -167,10 +169,14 @@ class SALC:
         Returns a list with the resulting projections for each factor (ao) of
         the product.
         """
+        print(self.characTab.operations)
+        print(self.characTab.characters[irrep])
         res = []
         # iterate over atomic orbitals in product of atomic orbitals
         for fac in prod:
 
+            # TODO this might be passed from outer function by a list that
+            # contains the spherical harmonics for each factor
             spherical_harmonic, _ = self.get_spherical_harmonic(fac)
 
             # get l type of the orbitals
@@ -189,11 +195,11 @@ class SALC:
 
             # now apply projection operator on this basis function
             tmp_res = []
-            for _, operation_symbol in enumerate(self.characTab.operations):
+            for i, operation_symbol in enumerate(self.characTab.operations):
                 dot = np.dot(
                     self.operation_matrices[spherical_harmonic][operation_symbol].T,
                     basis_function,
-                ) * int(operation_symbol.split()[0])
+                ) * int(operation_symbol.split()[0]) * self.characTab.characters[irrep][i]
                 tmp_res.append(dot)
             res.append(tmp_res)
         return res
