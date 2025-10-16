@@ -59,23 +59,50 @@ class MOProduct(SALC):
             # Multiply the term by the count
             summed = [arr * count * np.sign(sign) for arr in term]
 
-            # check if terms are all positive
-            # if not all(np.all(arr >= 0) for arr in summed):
-            #     print(summed)
-            #     print(sign_i, sign_j)
-            #     print("not positive")
-            #     exit()
-
             summed_terms.append(summed)
 
         return summed_terms
-
 
     def print_mo(self, mo):
         print("MO:")
         print(mo)
 
-    def get_mo_product(self, mo_list: list, zero=1e-12):
+    def transform_angular_basis_to_mo_basis(self, ao_product, aos_labels_in_product, mo_labels):
+        """Transform from angular basis to mo basis."""
+        res = []
+        # determine angular momentum
+        angular_momentum = ""
+        for i, function  in enumerate(ao_product):
+            for l_type in self.orbital_basisfunctions.keys():
+                if l_type in aos_labels_in_product[i]:
+                    angular_momentum = l_type
+                    break
+            # transform ao basis in orbital label (str)
+            tmp = self.get_ao_name(function, angular_momentum)
+
+            # now reassign to mo label
+            # the angular part remains. the number corresponds to the number of the atom
+            # the digit in the angular part in mo string (_1px) is taken
+            # from the initial mo label
+
+            # get labels from mo input
+            atom, angular = mo_labels[i].split("_")
+            mo_number = re.search(r'\d+', angular).group(0)
+            atom_letter = re.search(r'([A-Za-z]+)', atom).group(1)
+
+            # get labels from ao basis
+            ao, location = self.get_spherical_harmonic(tmp)
+
+            # add everything together
+            orbital_name = f"{atom_letter}{location}_{mo_number}{ao}"
+
+            # get sign
+            res.append(orbital_name)
+
+        sign = self.get_sign(ao_product)
+        return [sign] + res
+
+    def get_projection_of_mo_product(self, mo_list: list, zero=1e-12):
 
         irrep="A1g"
         for mo in mo_list:
@@ -100,8 +127,11 @@ class MOProduct(SALC):
                 tmp.append(self.mo_basis[idx])
             products_in_input_basis.append(tuple(tmp))
 
+
         # apply symmetry operator to each factor of each product
         # as example do for first product
+        results = []
+        results_mo_labels = []
         for product in products_in_input_basis:
 
             aos_labels_in_product = []
@@ -109,9 +139,12 @@ class MOProduct(SALC):
                 ao, location = self.get_spherical_harmonic(factor)
                 aos_labels_in_product.append(ao + location)
 
+
             print("Applying symmetry operators to product:")
             projection_result = self.apply_symmetry_operator_on_product(aos_labels_in_product, irrep)
-
+            print(projection_result)
+            print(aos_labels_in_product)
+            print(product)
 
             projection_result_labels = []
             for i, ao in enumerate(projection_result):
@@ -124,6 +157,7 @@ class MOProduct(SALC):
                         angular_momentum = l_type
                         break
 
+
                 for function in ao:
                     res.append(self.get_ao_name(function, angular_momentum))
                 projection_result_labels.append(res)
@@ -132,18 +166,84 @@ class MOProduct(SALC):
 
             print(np.column_stack(projection_result_labels))
             print()
+
             # for tmp in projection_result:
             #     for t in tmp:
             #         for val in t:
             #             print(f"{val:8.4f}", end=" ")
             #         print()
             #     print()
+
             combined = [list(x) for x in zip(*projection_result)]
+            print(combined[0])
+            # reassign aos to in the mo list
+            results.append(self.sum_identical_terms(combined))
 
-            result = self.sum_identical_terms(combined)
+            print("combined results:")
+            mo_labels = []
+            for res in combined:
+                tmp = self.transform_angular_basis_to_mo_basis(res, aos_labels_in_product, product)
+                mo_labels.append(tmp)
+            results_mo_labels.append(mo_labels)
+        return results, results_mo_labels
 
-            for tmp in result:
-                print(tmp)
+    def assign_ao_products_to_mos(self, ao_products: list, ao_products_labels: list, mo_list: list, zero = 1e-12):
+        """Assign ao products to mo products and return linear combinations of mos."""
 
+        product_list = []
+        print()
+        for prod in ao_products_labels:
+            for p in prod:
+                lab = []
+                for label in p[1:]:
+                    lab.append(self.mo_basis.index(label))
+                product_list.append(tuple(lab))
+        product_list = set(product_list)
 
-        return res
+        print("Product list")
+        print(product_list)
+        print("Start with assignment of ao products to mo products")
+        # generate all mo combinations
+        res = []
+        # generate full basis of mo products
+        # Enumerate over all index combinations
+
+        for mo_1 in mo_list:
+            for mo_2 in mo_list:
+                tmp = []
+                for combo in itertools.product(*[enumerate(mo) for mo in [mo_1, mo_2]]):
+                    indices = tuple(idx for idx, _ in combo)
+                    values = [val for _, val in combo]
+
+                    result = np.prod(values)
+                    if abs(result) > zero:
+                        tmp.append(indices)
+                res.append(tmp)
+        print(len(res))
+        print(res)
+
+        assign = np.zeros((len(product_list)), dtype=int)
+        res_been_found = np.zeros((4, len(res[0])), dtype=bool)
+        for j, product in enumerate(product_list):
+            found = False
+            for i, mo_product in enumerate(res):
+                for k, mo in enumerate(mo_product):
+                    if mo == product:
+                        assign[j] = i
+                        res_been_found[i][k] = True
+                        found = True
+                        break
+                if found:
+                    break
+            if not found:
+                print("Not found in mo products!")
+                print(product)
+        false_indices = np.where(res_been_found[0] == False)[0]
+        print(false_indices)
+        print(res[0][31])
+        print(res[0][59])
+        print(self.mo_basis[16])
+        print(self.mo_basis[35])
+        # print(res_been_found[0][false_indices])
+        # print(ao_products[0])
+        print(assign)
