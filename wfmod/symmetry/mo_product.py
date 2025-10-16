@@ -25,26 +25,47 @@ class MOProduct(SALC):
 
     def term_key(self, term):
         """Convert a list of arrays into a hashable key."""
-        return tuple(tuple(a) for a in term)
+        return tuple(tuple(abs(a)) for a in term)
+
+    def get_sign(self, term):
+        """Get the overall sign of a term represented as a list of arrays."""
+        sign = 1
+        for arr in term:
+            arr_sign = np.sign(np.prod(arr[arr != 0]))
+            sign *= arr_sign
+        return sign
 
     def sum_identical_terms(self, terms):
+        """Sum identical terms in a list of terms represented as lists of arrays."""
         summed_terms = []
         used = set()  # track indices we already summed
-
         for i, term in enumerate(terms):
             if i in used:
                 continue
 
-            # Find all identical terms
+            sign = self.get_sign(term)
+
+            # Find all identical terms regardless of sign
             key = self.term_key(term)
+
             count = 1
             for j in range(i+1, len(terms)):
                 if self.term_key(terms[j]) == key:
+                    sign_j = self.get_sign(terms[j])
                     count += 1
+                    sign += sign_j
                     used.add(j)
 
             # Multiply the term by the count
-            summed = [arr * count for arr in term]
+            summed = [arr * count * np.sign(sign) for arr in term]
+
+            # check if terms are all positive
+            # if not all(np.all(arr >= 0) for arr in summed):
+            #     print(summed)
+            #     print(sign_i, sign_j)
+            #     print("not positive")
+            #     exit()
+
             summed_terms.append(summed)
 
         return summed_terms
@@ -54,13 +75,13 @@ class MOProduct(SALC):
         print("MO:")
         print(mo)
 
-    def get_mo_product(self, mo_list: list):
+    def get_mo_product(self, mo_list: list, zero=1e-12):
 
+        irrep="A1g"
         for mo in mo_list:
             self.print_mo(mo)
 
         res = []
-        # get indices that form non-zero products
 
         # Enumerate over all index combinations
         for combo in itertools.product(*[enumerate(mo) for mo in mo_list]):
@@ -68,65 +89,61 @@ class MOProduct(SALC):
             values = [val for _, val in combo]
 
             result = np.prod(values)  # multiply all values together
-            if result > 1e-12:
+            if result > zero:
                 res.append(indices)
 
         # get AO for each index
         products_in_input_basis = []
         for tup in res:
-            tmp = ()
+            tmp = []
             for idx in tup:
-                print(self.mo_basis[idx])
-                tmp += (self.mo_basis[idx],)
-            products_in_input_basis.append(tmp)
-        print(products_in_input_basis)
+                tmp.append(self.mo_basis[idx])
+            products_in_input_basis.append(tuple(tmp))
 
         # apply symmetry operator to each factor of each product
         # as example do for first product
-        product = products_in_input_basis[15]
-        print("Product:")
-        print(product)
+        for product in products_in_input_basis:
 
-        aos_labels_in_product = []
-        for factor in product:
-            ao, location = self.get_spherical_harmonic(factor)
-            aos_labels_in_product.append(ao + location)
+            aos_labels_in_product = []
+            for factor in product:
+                ao, location = self.get_spherical_harmonic(factor)
+                aos_labels_in_product.append(ao + location)
 
-        print("aos_labels_in_product:")
-        print(aos_labels_in_product)
-        print()
-
-        print("Applying symmetry operators to product:")
-        projection_result = self.apply_symmetry_operator_on_product(aos_labels_in_product)
+            print("Applying symmetry operators to product:")
+            projection_result = self.apply_symmetry_operator_on_product(aos_labels_in_product, irrep)
 
 
-        projection_result_labels = []
-        for i, ao in enumerate(projection_result):
-            res = []
+            projection_result_labels = []
+            for i, ao in enumerate(projection_result):
+                res = []
 
-            # determine angular momentum
-            angular_momentum = ""
-            for l_type in self.orbital_basisfunctions.keys():
-                if l_type in aos_labels_in_product[i]:
-                    angular_momentum = l_type
-                    break
+                # determine angular momentum
+                angular_momentum = ""
+                for l_type in self.orbital_basisfunctions.keys():
+                    if l_type in aos_labels_in_product[i]:
+                        angular_momentum = l_type
+                        break
 
-            for function in ao:
-                res.append(self.get_ao_name(function, angular_momentum))
-            projection_result_labels.append(res)
+                for function in ao:
+                    res.append(self.get_ao_name(function, angular_momentum))
+                projection_result_labels.append(res)
 
-        print("reshape")
+            print("reshape")
 
-        print(np.column_stack(projection_result_labels))
-        print((projection_result))
-        print()
-        combined = [list(x) for x in zip(*projection_result)]
+            print(np.column_stack(projection_result_labels))
+            print()
+            # for tmp in projection_result:
+            #     for t in tmp:
+            #         for val in t:
+            #             print(f"{val:8.4f}", end=" ")
+            #         print()
+            #     print()
+            combined = [list(x) for x in zip(*projection_result)]
 
-        tmp = self.add_functions(combined[0], combined[0])
-        result = self.sum_identical_terms(combined)
+            result = self.sum_identical_terms(combined)
 
-        # TODO how deal with sign of the multiplications?
-        for tmp in result:
-            print(tmp)
+            for tmp in result:
+                print(tmp)
+
 
         return res
