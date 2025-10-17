@@ -12,11 +12,24 @@ def moProd():
     return moProd
 
 
+# test sign assignment of several variables in term
 @pytest.mark.parametrize("a,expected", [
-   ([np.array([1, 0, 0, 0, 0, 0]), np.array([-1, 0, 0, 0, 0, 0])], (-1, [np.array([1, 0, 0, 0, 0, 0]), np.array([1, 0, 0, 0, 0, 0])])),
-   ([np.array([1, 0, 0, 0, 0, 0]), np.array([1, 0, 0, 0, 0, 0])], (1, [np.array([1, 0, 0, 0, 0, 0]), np.array([1, 0, 0, 0, 0, 0])])),
-   ([np.array([-1, 0, 0, 0, 0, 0]), np.array([-1, 0, 0, 0, 0, 0])], (1, [np.array([1, 0, 0, 0, 0, 0]), np.array([1, 0, 0, 0, 0, 0])])),
-   ([np.array([-1, 0, -1, 0, 0, 0]), np.array([-1, 0, 1, 0, 0, 0])], (-1, [np.array([1, 0, 1, 0, 0, 0]), np.array([1, 0, 1, 0, 0, 0])])),
+   (
+        [np.array([1, 0, 0, 0, 0, 0]), np.array([-1, 0, 0, 0, 0, 0])],
+        (-1, [np.array([1, 0, 0, 0, 0, 0]), np.array([1, 0, 0, 0, 0, 0])])
+    ),
+   (
+       [np.array([1, 0, 0, 0, 0, 0]), np.array([1, 0, 0, 0, 0, 0])],
+       (1, [np.array([1, 0, 0, 0, 0, 0]), np.array([1, 0, 0, 0, 0, 0])])
+    ),
+   (
+       [np.array([-1, 0, 0, 0, 0, 0]), np.array([-1, 0, 0, 0, 0, 0])],
+       (1, [np.array([1, 0, 0, 0, 0, 0]), np.array([1, 0, 0, 0, 0, 0])])
+    ),
+   (
+       [np.array([-1, 0, -1, 0, 0, 0]), np.array([-1, 0, 1, 0, 0, 0])],
+       (-1, [np.array([1, 0, 1, 0, 0, 0]), np.array([1, 0, 1, 0, 0, 0])])
+    ),
 ])
 def test_get_sign(moProd, a, expected):
     """Test get_sign method of MOProduct class"""
@@ -30,6 +43,8 @@ def test_get_sign(moProd, a, expected):
     for arr_r, arr_e in zip(arrays_result, arrays_expected):
         assert np.array_equal(arr_r, arr_e), f"Arrays differ: {arr_r} vs {arr_e}"
 
+
+# test summation of two functions
 @pytest.mark.parametrize("a,b,expected", [
    (
        [-1, [np.array([1, 0, 0, 0, 0, 0])]],
@@ -57,7 +72,7 @@ def test_get_sign(moProd, a, expected):
        None,
    ),
 ])
-def test_add_functions_identical(moProd, a, b, expected):
+def test_add_two_functions(moProd, a, b, expected):
     """Test add_functions method of MOProduct class"""
     result = moProd.add_two_functions(a, b)
 
@@ -67,3 +82,60 @@ def test_add_functions_identical(moProd, a, b, expected):
             assert np.array_equal(res_arr, exp_arr), f"Arrays differ: {res_arr} vs {exp_arr}"
     else:
         assert result is None
+
+
+# test summation of several functions
+@pytest.mark.parametrize("a,expected", [
+   (
+    [
+        [+1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [-1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [+1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [+1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]]
+    ],
+    [[+2, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]]]
+   ),
+   (
+    [
+        [+1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [-1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [-1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [+1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]]
+    ],
+    [[0, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]]]
+    ),
+    (
+    [
+        [+1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [-1, [np.array([0, 1, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [+1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [+1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]]
+    ],
+    [
+        [3, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [-1, [np.array([0, 1, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]]
+    ]
+   ),
+   (
+    [
+        [+1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [-1, [np.array([0, 1, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [+1, [np.array([1, 0, 1, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [+1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 1, 0])]]
+    ],
+    [
+        [+1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [-1, [np.array([0, 1, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [+1, [np.array([1, 0, 1, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+        [+1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 1, 0])]]
+    ],
+   )
+])
+def test_sum_all_functions(moProd, a, expected):
+    """Test sum_identical_terms method of MOProduct class"""
+    result = moProd.sum_identical_terms(a)
+
+    for res, exp in zip(result, expected):
+        assert res[0] == exp[0], f"Prefactors differ: {res[0]} vs {exp[0]}"
+        for res_arr, exp_arr in zip(res[1], exp[1]):
+            assert np.array_equal(res_arr, exp_arr), f"Arrays differ: {res_arr} vs {exp_arr}"
