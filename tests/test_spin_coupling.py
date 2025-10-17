@@ -1,6 +1,9 @@
 import pytest
 from wfmod.spin_coupling import SpinCoupling
 
+# run tests with:
+# export PYTHONPATH=/home/broecker/bin/wfmod:$PYTHONPATH
+# pytest wfmod/tests -v
 
 @pytest.fixture
 def sc():
