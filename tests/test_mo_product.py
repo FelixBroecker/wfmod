@@ -20,8 +20,7 @@ def moProd():
 ])
 def test_get_sign(moProd, a, expected):
     """Test get_sign method of MOProduct class"""
-    result = moProd.get_sign(a)
-    sign_result, arrays_result = result
+    sign_result, arrays_result = moProd.get_sign(a)
     sign_expected, arrays_expected = expected
 
     # Compare sign
@@ -30,3 +29,41 @@ def test_get_sign(moProd, a, expected):
     # Compare arrays elementwise
     for arr_r, arr_e in zip(arrays_result, arrays_expected):
         assert np.array_equal(arr_r, arr_e), f"Arrays differ: {arr_r} vs {arr_e}"
+
+@pytest.mark.parametrize("a,b,expected", [
+   (
+       [-1, [np.array([1, 0, 0, 0, 0, 0])]],
+       [-1, [np.array([1, 0, 0, 0, 0, 0])]],
+       [-2, [np.array([1, 0, 0, 0, 0, 0])]],
+   ),
+   (
+       [+1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+       [-1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+       [0, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+   ),
+   (
+       [-1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+       [-1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+       [-2, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+   ),
+   (
+       [-1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+       [-1, [np.array([1, 0, 0, 0, 0, 0])]],
+       None,
+   ),
+   (
+       [-1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0, 0])]],
+       [-1, [np.array([1, 0, 0, 0, 0, 0]), np.array([0, 1, 0, 0, 0])]],
+       None,
+   ),
+])
+def test_add_functions_identical(moProd, a, b, expected):
+    """Test add_functions method of MOProduct class"""
+    result = moProd.add_two_functions(a, b)
+
+    if expected is not None:
+        assert result[0] == expected[0], f"Prefactors differ: {result[0]} vs {expected[0]}"
+        for res_arr, exp_arr in zip(result[1], expected[1]):
+            assert np.array_equal(res_arr, exp_arr), f"Arrays differ: {res_arr} vs {exp_arr}"
+    else:
+        assert result is None
