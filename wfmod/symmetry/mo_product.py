@@ -27,13 +27,15 @@ class MOProduct(SALC):
         """Convert a list of arrays into a hashable key."""
         return tuple(tuple(abs(a)) for a in term)
 
-    def get_sign(self, term):
+    def get_sign(self, term: list[np.ndarray]):
         """Get the overall sign of a term represented as a list of arrays."""
         sign = 1
+        positive_terms = []
         for arr in term:
             arr_sign = np.sign(np.prod(arr[arr != 0]))
+            positive_terms.append(abs(arr))
             sign *= arr_sign
-        return sign
+        return sign, positive_terms
 
     def sum_identical_terms(self, terms):
         """Sum identical terms in a list of terms represented as lists of arrays."""
