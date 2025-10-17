@@ -161,8 +161,7 @@ class Transformations:
         }
         if cartesian:
             orbital_basisfunctions["d"] = [
-                "dxy1", "dxz1", "dyz1", "dxx1", "dyy1", "dzz1", "dxy2", "dxz2", "dyz2", "dxx2", "dyy2", "dzz2",
-]
+                "dxy1", "dxz1", "dyz1", "dxx1", "dyy1", "dzz1", "dxy2", "dxz2", "dyz2", "dxx2", "dyy2", "dzz2",]
         s_orbital_basis = [np.array([1, 0]), np.array([0, 1])]
         p_orbital_basis = [
             np.array([1, 0, 0, 0, 0, 0]),
