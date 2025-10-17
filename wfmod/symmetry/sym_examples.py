@@ -8,7 +8,7 @@ from salc import SALC
 
 if __name__ == "__main__":
     # tests in development stage
-    data_set = "c2_tz"
+    data_set = "c2_sz"
     cartesian = False
     if data_set == "c2_sz":
         # C2 in minimal basis
@@ -19,7 +19,7 @@ if __name__ == "__main__":
         # parse MO coefficients
         with open(path, "r") as file:
             data = yaml.safe_load(file)
-        mos = data["molecularOrbitals"]["coefficients"].values()
+        mos = list(map(list, zip(*data["molecularOrbitals"]["coefficients"].values())))
 
     elif data_set == "c2_dz":
         # C2 in double zeta
@@ -32,6 +32,7 @@ if __name__ == "__main__":
         with open(path, "r") as file:
             data = yaml.safe_load(file)
         mos = data["molecularOrbitals"]["coefficients"].values()
+        mos = list(map(list, zip(*data)))
 
     elif data_set == "c2_tz":
         path = "docs/orca_tzpae.yaml"
@@ -131,28 +132,16 @@ if __name__ == "__main__":
     # test mo products
     moProd = MOProduct(point_group, orbital_basis, cartesian=cartesian)
     print("mo")
-    print(mos[5])
-    prod, labels = moProd.get_projection_of_mo_product([mos[5], mos[5]])
+    idx1 = 5
+    idx2 = 7
+    idx3 = 2
+    print(mos[idx1])
+    print(mos[idx2])
+    print(mos[idx3])
+    res = moProd.compute_mo_product([mos[idx1], mos[idx2], mos[idx3]])
 
-    moProd.assign_ao_products_to_mos(prod, labels, [mos[4], mos[5]])
+    # moProd.assign_ao_products_to_mos(prod, labels, [mos[4], mos[5]])
+    print(res)
 
     exit()
     # test for identical terms in mo product
-    test1 = [
-        [np.array([0., 0., 0., 0., 0., 0., 1., 0., 0., 0.]), np.array([0., 0., 0., 1., 0., 0.])],
-        [np.array([0., 0., 0., 0., 0., 0., 1., 0., 0., 0.]), np.array([0., 0., 0., 1., 0., 0.])],
-    ]
-    test2 = [
-        [np.array([0., 0., 0., 0., 0., 0., 1., 0., 0., 0.]), np.array([0., 0., 0., 1., 0., 0.])],
-        [np.array([0., 0., 0., 0., 0., 0., -1., 0., 0., 0.]), np.array([0., 0., 0., 1., 0., 0.])],
-    ]
-    test3 = [
-        [np.array([0., 0., 0., 0., 0., 0., 1., 0., 0., 0.]), np.array([0., 0., 0., 1., 0., 0.])],
-        [np.array([0., 0., 0., 0., 0., 0., -1., 0., 0., 0.]), np.array([0., 0., 0., -1., 0., 0.])],
-    ]
-    test3 = [
-        [np.array([0., 0., 0., 0., 0., 0., -1., 0., 0., 0.]), np.array([0., 0., 0., 1., 0., 0.])],
-        [np.array([0., 0., 0., 0., 0., 0., -1., 0., 0., 0.]), np.array([0., 0., 0., -1., 0., 0.])],
-    ]
-    res = moProd.sum_identical_terms(test3)
-    print(res)
