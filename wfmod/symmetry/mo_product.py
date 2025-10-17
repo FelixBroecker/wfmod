@@ -79,6 +79,27 @@ class MOProduct(SALC):
 
         return summed_terms
 
+    def compute_mo_product(self, mos: list, zero=1e-12):
+        """
+        Compute the products of molecular orbitals in terms of atomic orbitals.
+        Returns a list with products of atomic orbitals given in indices of the
+        MO input list (indice corresponds to AO).
+
+        Returns: list of tuples with indices of the MO basis functions.
+        """
+        res = []
+
+        # Enumerate over all index combinations
+        for combo in itertools.product(*[enumerate(mo) for mo in mos]):
+            indices = tuple(idx for idx, _ in combo)
+            values = [val for _, val in combo]
+
+            result = np.prod(values)  # multiply all values together
+            if result > zero:
+                res.append(indices)
+
+        return res
+
     def transform_angular_basis_to_mo_basis(self, ao_product, aos_labels_in_product, mo_labels):
         """Transform from angular basis to mo basis."""
         res = []
@@ -115,7 +136,6 @@ class MOProduct(SALC):
         return [sign] + res
 
     def get_projection_of_mo_product(self, mo_list: list, zero=1e-12):
-
         irrep="A1g"
         for mo in mo_list:
             self.print_mo(mo)
