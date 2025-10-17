@@ -1,31 +1,49 @@
 import re
+
 import numpy as np
 import itertools as itertools
 from wfmod.symmetry.salc import SALC
 
+
 class MOProduct(SALC):
+    """Class to get symmetry adapted product basis functions of molecular orbitals."""
     def __init__(self, point_group: str, basis: list, cartesian: bool = False):
         super().__init__(point_group, basis, cartesian)
 
-    def add_functions(self, f1, f2):
-        """Add two functions represented as lists of numpy arrays.
-        Add them only if they are identical."""
+    def add_two_functions(self,
+                            f1: list[int, np.ndarray],
+                            f2: list[int, np.ndarray]
+                          ) -> list[int, np.ndarray] | None:
+        """
+        Add two functions represented as lists of numpy arrays.
+        Add them only if the 'variables' in the function part are identical.
 
-        # must have same number of factors
-        if len(f1) != len(f2):
+        Returns the summed function or None if they cannot be added.
+        """
+        equal = True
+
+        # check if same number of factors
+        if len(f1[1]) != len(f2[1]):
             return None
 
-        result = []
-        for a, b in zip(f1, f2):
-            if np.array_equal(a, b):   # only if arrays are identical
-                result.append(a + b)
-            else:
+        for factor_1, factor_2 in zip(f1[1], f2[1]):
+            # check if they variables have the same shape
+            if factor_1.shape != factor_2.shape:
                 return None
-        return result
+
+            # check if the arrays are identical
+            if not np.array_equal(factor_1, factor_2):
+                equal = False
+
+        if equal:
+            prefactor = f1[0] + f2[0]
+            return [prefactor, f1[1]]
+        else:
+            return None
 
     def term_key(self, term):
         """Convert a list of arrays into a hashable key."""
-        return tuple(tuple(abs(a)) for a in term)
+        return tuple(tuple(a) for a in term)
 
     def get_sign(self, term: list[np.ndarray]):
         """Get the overall sign of a term represented as a list of arrays."""
@@ -45,29 +63,21 @@ class MOProduct(SALC):
             if i in used:
                 continue
 
-            sign = self.get_sign(term)
-
             # Find all identical terms regardless of sign
-            key = self.term_key(term)
+            key = self.term_key(term[1])
 
-            count = 1
+            sign = term[0]
             for j in range(i+1, len(terms)):
-                if self.term_key(terms[j]) == key:
-                    sign_j = self.get_sign(terms[j])
-                    count += 1
-                    sign += sign_j
+                if self.term_key(terms[j][1]) == key:
+                    sign += terms[j][0]
                     used.add(j)
 
             # Multiply the term by the count
-            summed = [arr * count * np.sign(sign) for arr in term]
+            summed = [sign, term[1]]
 
             summed_terms.append(summed)
 
         return summed_terms
-
-    def print_mo(self, mo):
-        print("MO:")
-        print(mo)
 
     def transform_angular_basis_to_mo_basis(self, ao_product, aos_labels_in_product, mo_labels):
         """Transform from angular basis to mo basis."""
