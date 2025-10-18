@@ -100,6 +100,63 @@ class MOProduct(SALC):
 
         return res
 
+    def get_ao_basis_function_by_idx(self, idx: int) -> np.array:
+        """Assign the transformations in ao basis to mo basis."""
+        ao = np.zeros(len(self.mo_basis))
+        ao[idx] = 1.0
+        return ao
+
+    def get_transformations_in_mo_basis(self):
+        """Get transformation matrices for each symmetry operation in the mo basis,"""
+
+        # transform mo basis in a more comparable basis
+        # assigned as 1 s1 , 2 s1 , 1 px1, ... , 1 s2, 2 s2, 1 px2 ...
+        # so they belong together if first number is the same
+        print(self.mo_basis)
+        ao_label = []
+        ao_number = []
+        for mo in self.mo_basis:
+            ao, location = self.get_spherical_harmonic(mo)
+            number = re.search(r'\d+', mo.split("_")[-1]).group(0)
+            ao_label.append(ao + location)
+            ao_number.append(number)
+
+        print("AO labels:" )
+        print(ao_label)
+        print("AO numbers:" )
+        print(ao_number)
+
+        # iterate over different angular momenta basis (s, p, d ...)
+        tmp = {}
+        for angular_momentum, ao_basis in self.orbital_basisfunctions.items():
+            tmp[angular_momentum] = {}
+            # iterate over the bassis functions (e.g. s1, s2)
+            for basis_function in ao_basis:
+                # find that in the ao_label and group them by their number
+                # to distinguish between them (e.g. 1s1 1s2 and 2s1 2s2)
+                for i, (number, label) in enumerate(zip(ao_number,ao_label)):
+                    if basis_function == label:
+                        print(f"Found basis function {basis_function} {number}")
+                        tmp.setdefault(angular_momentum, {}).setdefault(f"{number}", []).append(i)
+        # TODO continue here to now get transformation matrices
+        print(tmp)
+
+        exit()
+        # find all s with same number
+        print(ao_label)
+        print(ao_number)
+
+        print(self.orbital_basis["s"])
+        print(self.orbital_basis.keys())
+        print("orbital basis functions:")
+        print(self.orbital_basisfunctions)
+        print(self.orbital_basisfunctions["s"])
+        print(self.operation_matrices["s"])
+
+
+
+
+
     def transform_angular_basis_to_mo_basis(self, ao_product, aos_labels_in_product, mo_labels):
         """Transform from angular basis to mo basis."""
         res = []
