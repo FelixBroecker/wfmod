@@ -214,7 +214,6 @@ def test_compute_mo_product(moProd, a, expected):
         np.eye(1, 38, 16).flatten(),  # 1dyz orbital on atom 1 of a linear molecule
         np.eye(1, 38, 34).flatten(),
     )
-
 ])
 def test_get_transformations_in_mo_basis(moProd, a, b, expected):
     """Test get_transformations_in_mo_basis method of MOProduct class"""
@@ -223,3 +222,50 @@ def test_get_transformations_in_mo_basis(moProd, a, b, expected):
 
     # Compare arrays elementwise
     assert np.array_equal(array_result, expected), f"Arrays differ: {array_result} vs {expected}"
+
+
+@pytest.mark.parametrize("a,b,expected", [
+   (
+        [np.eye(1, 38, 5).flatten(), np.eye(1, 38, 5).flatten()],   # px1 * px1
+        "A1g",
+        [
+            [0.25, [np.eye(1, 38, 5).flatten()], np.eye(1, 38, 5).flatten()],
+            [0.25, [np.eye(1, 38, 6).flatten()], np.eye(1, 38, 6).flatten()],
+            [0.25, [np.eye(1, 38, 24).flatten()], np.eye(1, 38, 24).flatten()],
+            [0.25, [np.eye(1, 38, 25).flatten()], np.eye(1, 38, 25).flatten()]
+            ]
+    ),
+    (
+        [np.eye(1, 38, 5).flatten(), np.eye(1, 38, 5).flatten()],   # px1 * px1
+        "A2g",
+        [
+            [0.0, [np.eye(1, 38, 5).flatten()], np.eye(1, 38, 5).flatten()],
+            [0.0, [np.eye(1, 38, 6).flatten()], np.eye(1, 38, 6).flatten()],
+            [0.0, [np.eye(1, 38, 24).flatten()], np.eye(1, 38, 24).flatten()],
+            [0.0, [np.eye(1, 38, 25).flatten()], np.eye(1, 38, 25).flatten()]
+            ]
+    ),
+    (
+        [np.eye(1, 38, 5).flatten(), np.eye(1, 38, 5).flatten()],   # px1 * px1
+        "B1g",
+        [
+            [0.25, [np.eye(1, 38, 5).flatten()], np.eye(1, 38, 5).flatten()],
+            [-0.25, [np.eye(1, 38, 6).flatten()], np.eye(1, 38, 6).flatten()],
+            [0.25, [np.eye(1, 38, 24).flatten()], np.eye(1, 38, 24).flatten()],
+            [-0.25, [np.eye(1, 38, 25).flatten()], np.eye(1, 38, 25).flatten()]
+            ]
+    ),
+])
+def test_get_projection_of_ao_product(moProd, a, b, expected):
+    """Test get_projection_of_ao_product method of MOProduct class"""
+    for i, term in enumerate(a):
+        a[i] = moProd.get_sign(term)
+    moProd.get_transformations_in_mo_basis()
+    result = moProd.get_projection_of_ao_product(a, b)
+
+
+    assert len(result) == len(expected), f"Number of terms differ: {len(result)} vs {len(expected)}"
+    for res, exp in zip(result, expected):
+        assert res[0] == exp[0], f"Prefactors differ: {res[0]} vs {exp[0]}"
+        for res_arr, exp_arr in zip(res[1], exp[1]):
+            assert np.array_equal(res_arr, exp_arr), f"Arrays differ: {res_arr} vs {exp_arr}"
