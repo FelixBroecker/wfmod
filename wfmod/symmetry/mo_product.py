@@ -107,6 +107,12 @@ class MOProduct(SALC):
         ao[idx] = 1.0
         return ao
 
+    def get_idx_by_ao_basis_function(self, ao_func) -> int:
+        """Get the index of an ao basis function in the mo basis."""
+        ao_func = np.array(ao_func)
+        idx = int(np.where(ao_func == 1.0)[0])
+        return idx
+
     def get_transformations_in_mo_basis(self) -> dict:
         """
         Get transformation matrices for each symmetry operation in the mo basis.
@@ -177,7 +183,6 @@ class MOProduct(SALC):
         # apply projection operator
         # P^irrep = ( dimension/order ) sum_over_operations [ chi^irrep(op) * R(op) ]
         # (eq. 5.24 Atkins Friedman 2011. Ed. 5; Example 5.9)
-        print(target_symmetry)
         order = self.characTab.order
         mulliken_letter = re.search(r'([A-Z]+)', target_symmetry).group(0)
         dim = self.characTab.get_dimension(mulliken_letter)
@@ -195,40 +200,45 @@ class MOProduct(SALC):
         result = self.sum_identical_terms(result)
         return result
 
-    def transform_angular_basis_to_mo_basis(self, ao_product, aos_labels_in_product, mo_labels):
-        """Transform from angular basis to mo basis."""
-        res = []
-        # determine angular momentum
-        angular_momentum = ""
-        for i, function  in enumerate(ao_product):
-            for l_type in self.orbital_basisfunctions.keys():
-                if l_type in aos_labels_in_product[i]:
-                    angular_momentum = l_type
-                    break
-            # transform ao basis in orbital label (str)
-            tmp = self.get_ao_name(function, angular_momentum)
+    def get_all_ao_product_projections(self, mo_product: list, target_symmetry: str):
+        """
+        Compute all product of mos, project each ao product in the mo product
+        with the projection operator. Assign the results back to linear combination of mo products.
+        """
+        # compute mo product and get a sum of ao products
+        ao_product_factors = self.compute_mo_product(mo_product)
 
-            # now reassign to mo label
-            # the angular part remains. the number corresponds to the number of the atom
-            # the digit in the angular part in mo string (_1px) is taken
-            # from the initial mo label
+        # convert ao indices to ao basis functions
+        ao_product_factors_converted = []
+        for ao_product in ao_product_factors:
+            ao_funcs = []
+            for idx in ao_product:
+                ao_func = self.get_ao_basis_function_by_idx(idx)
+                ao_funcs.append(self.get_sign(ao_func))
+            ao_product_factors_converted.append(ao_funcs)
 
-            # get labels from mo input
-            atom, angular = mo_labels[i].split("_")
-            mo_number = re.search(r'\d+', angular).group(0)
-            atom_letter = re.search(r'([A-Za-z]+)', atom).group(1)
+        # load projection matrices
+        self.get_transformations_in_mo_basis()
 
-            # get labels from ao basis
-            ao, location = self.get_spherical_harmonic(tmp)
+        # project each ao product to the target symmetries
+        projected_ao_products: list = []
+        for ao_product in ao_product_factors_converted:
+            projected_ao_products += self.get_projection_of_ao_product(ao_product, target_symmetry)
 
-            # add everything together
-            orbital_name = f"{atom_letter}{location}_{mo_number}{ao}"
+        # convert projected ao basis functions back to indices
+        for i, term in enumerate(projected_ao_products):
+            tmp = []
+            for ao in term[1]:
+                idx = self.get_idx_by_ao_basis_function(ao)
+                tmp.append(idx)
+            projected_ao_products[i][1] = tuple(tmp)
+        print(projected_ao_products)
 
-            # get sign
-            res.append(orbital_name)
+        # compare to all combinations from the input mo product and assign terms
+        # to the corresponding mo product to get linear combinations of mo products.
 
-        sign = self.get_sign(ao_product)
-        return [sign] + res
+        return []
+
 
     def assign_ao_products_to_mos(self, ao_products: list, ao_products_labels: list, mo_list: list, zero = 1e-12):
         """Assign ao products to mo products and return linear combinations of mos."""
