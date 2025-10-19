@@ -260,7 +260,6 @@ class MOProduct(SALC):
                 idx = self.get_idx_by_ao_basis_function(ao)
                 tmp.append(idx)
             projected_ao_products[i][1] = tuple(tmp)
-        print(projected_ao_products)
 
         # compare to all combinations from the input mo product and assign terms
         # to the corresponding mo product to get linear combinations of mo products.
@@ -283,8 +282,6 @@ class MOProduct(SALC):
                         break
                 if found:
                     break
-        print("MO assignments:")
-        print(mo_assignments)
         unique_assignments = list(set(mo_assignments))
 
         # TODO handle the zero case properly
