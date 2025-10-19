@@ -34,6 +34,7 @@ class Transformations:
     def get_d2h_matrices() -> dict[str, object]:
         """load the opertion matrices for linear diatomics for
         s, px, py, pz orbitals."""
+        string_transformations = {}
 
         orbital_basisfunctions = {
             "s": ["s1", "s2"],
@@ -59,6 +60,8 @@ class Transformations:
             "1 s_xz": ["s1 -> +s1", "s2 -> +s2"],
             "1 s_yz": ["s1 -> +s1", "s2 -> +s2"],
         }
+        string_transformations["s"] = s_orbs.copy()
+
         s_reducable_basis = [2, 2, 0, 0, 0, 0, 2, 2]
         orb_empty = np.zeros((len(s_orbital_basis), len(s_orbital_basis)))
         # convert to transformation matrix
@@ -77,6 +80,8 @@ class Transformations:
             "1 s_xz": ["px1 -> +px1", "px2 -> +px2"],
             "1 s_yz": ["px1 -> -px1", "px2 -> -px2"],
         }
+        string_transformations["px"] = px_orbs.copy()
+
         orb_empty = np.zeros((len(p_orbital_basis), len(p_orbital_basis)))
         px_reducable_basis = [2, -2, 0, 0, 0, 0, 2, -2]
         # convert to transformation matrix
@@ -95,6 +100,8 @@ class Transformations:
             "1 s_xz": ["py1 -> -py1", "py2 -> -py2"],
             "1 s_yz": ["py1 -> +py1", "py2 -> +py2"],
         }
+        string_transformations["py"] = py_orbs.copy()
+
         py_reducable_basis = [2, -2, 0, 0, 0, 0, -2, 2]
         # convert to transformation matrix
         for mulliken, operations in py_orbs.items():
@@ -112,13 +119,15 @@ class Transformations:
             "1 s_xz": ["pz1 -> +pz1", "pz2 -> +pz2"],
             "1 s_yz": ["pz1 -> +pz1", "pz2 -> +pz2"],
         }
+        string_transformations["pz"] = pz_orbs.copy()
+
         pz_reducable_basis = [2, 2, 0, 0, 0, 0, 2, 2]
         # convert to transformation matrix
         for mulliken, operations in pz_orbs.items():
             pz_orbs[mulliken] = Transformations.get_transformation_matrix(
                 operations, "p", orb_empty, orbital_basisfunctions
             )
-        # load in variable
+        # load in variables
 
         operation_matrices = {
             "s": s_orbs,
@@ -140,19 +149,21 @@ class Transformations:
             "py": p_orbital_basis,
             "pz": p_orbital_basis,
         }
+
         return_dict = {
             "basis_functions": orbital_basisfunctions,
             "operation_matrices": operation_matrices,
             "spanned_basis": spanned_basis,
             "orbital_basis": orbital_basis,
+            "string_transformations": string_transformations,
         }
         return return_dict
 
     @staticmethod
-    def get_d4h_matrices(cartesian: bool = False):
+    def get_d4h_matrices(cartesian: bool = False) -> dict[str, object]:
         """load the opertion matrices for linear diatomics for
         s, px, py, pz, dxy, dxz, dyz, dx2-y2, dz2 orbitals."""
-
+        string_transformations = {}
         orbital_basisfunctions = {
             "s": ["s1", "s2"],
             "p": ["px1", "py1", "pz1", "px2", "py2", "pz2"],
@@ -194,6 +205,7 @@ class Transformations:
             "1 sd'": ["s1 -> +s1", "s2 -> +s2"],
             "1 sd''": ["s1 -> +s1", "s2 -> +s2"],
         }
+        string_transformations["s"] = s_orbs.copy()
         orb_empty = np.zeros((len(s_orbital_basis), len(s_orbital_basis)))
         s_reducable_basis = [2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2]
         # convert to transformation matrix
@@ -220,6 +232,7 @@ class Transformations:
             "1 sd'": ["px1 -> +py1", "px2 -> +py2"],
             "1 sd''": ["px1 -> -py1", "px2 -> -py2"],
         }
+        string_transformations["px"] = px_orbs.copy()
         orb_empty = np.zeros((len(p_orbital_basis), len(p_orbital_basis)))
         px_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, -2, -2, 2, 2]
 
@@ -247,6 +260,7 @@ class Transformations:
             "1 sd'": ["py1 -> +px1", "py2 -> +px2"],
             "1 sd''": ["py1 -> -px1", "py2 -> -px2"],
         }
+        string_transformations["py"] = py_orbs.copy()
         py_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, -2, -2]
         # convert to transformation matrix
         for mulliken, operations in py_orbs.items():
@@ -272,6 +286,7 @@ class Transformations:
             "1 sd'": ["pz1 -> +pz1", "pz2 -> +pz2"],
             "1 sd''": ["pz1 -> +pz1", "pz2 -> +pz2"],
         }
+        string_transformations["pz"] = pz_orbs.copy()
         pz_reducable_basis = [2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2]
         # convert to transformation matrix
         for mulliken, operations in pz_orbs.items():
@@ -398,6 +413,7 @@ class Transformations:
             "1 sd'": ["dxy1 -> +dxy1", "dxy2 -> +dxy2"],
             "1 sd''": ["dxy1 -> +dxy1", "dxy2 -> +dxy2"],
         }
+        string_transformations["dxy"] = dxy_orbs.copy()
         orb_empty = np.zeros((len(d_orbital_basis), len(d_orbital_basis)))
         dxy_reducable_basis = [2, -2, -2, 2, 0, 0, 0, 0, 0, 0, 0, 0, -2, -2, +2, +2]
 
@@ -419,6 +435,7 @@ class Transformations:
             "1 sd'": ["dxz1 -> +dyz1", "dxz2 -> +dyz2"],
             "1 sd''": ["dxz1 -> -dyz1", "dxz2 -> -dyz2"],
         }
+        string_transformations["dxz"] = dxz_orbs
         dxz_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, +2, -2]
 
         dyz_orbs = {
@@ -439,6 +456,7 @@ class Transformations:
             "1 sd'": ["dyz1 -> +dxz1", "dyz2 -> +dxz2"],
             "1 sd''": ["dyz1 -> -dxz1", "dyz2 -> -dxz2"],
         }
+        string_transformations["dyz"] = dyz_orbs.copy()
         dyz_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, -2, -2, 2, 2]
 
         dxxyy_orbs = {
@@ -459,6 +477,7 @@ class Transformations:
             "1 sd'": ["dxxyy1 -> -dxxyy1", "dxxyy2 -> -dxxyy2"],
             "1 sd''": ["dxxyy1 -> -dxxyy1", "dxxyy2 -> -dxxyy2"],
         }
+        string_transformations["dxxyy"] = dxxyy_orbs.copy()
         dxxyy_reducable_basis = [2, -2, -2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, -2, -2]
 
         dzz_orbs = {
@@ -479,6 +498,7 @@ class Transformations:
             "1 sd'": ["dzz1 -> +dzz1", "dzz2 -> +dzz2"],
             "1 sd''": ["dzz1 -> +dzz1", "dzz2 -> +dzz2"],
         }
+        string_transformations["dzz"] = dzz_orbs.copy()
         dzz_reducable_basis = [2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2]
 
         dxx_orbs = {
@@ -499,6 +519,8 @@ class Transformations:
             "1 sd'": ["dxx1 -> +dyy1", "dxx2 -> +dyy2"],
             "1 sd''": ["dxx1 -> +dyy1", "dxx2 -> +dyy2"],
         }
+        if cartesian:
+            string_transformations["dxx"] = dxx_orbs.copy()
         dxx_reducable_basis = [2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0,]
 
         dyy_orbs = {
@@ -519,6 +541,8 @@ class Transformations:
             "1 sd'": ["dyy1 -> +dxx1", "dyy2 -> +dxx2"],
             "1 sd''": ["dyy1 -> +dxx1", "dyy2 -> +dxx2"],
         }
+        if cartesian:
+            string_transformations["dyy"] = dyy_orbs.copy()
         dyy_reducable_basis = [2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0,]
 
         dzz_cart_orbs = {
@@ -539,6 +563,8 @@ class Transformations:
             "1 sd'": ["dzz1 -> +dzz1", "dzz2 -> +dzz2"],
             "1 sd''": ["dzz1 -> +dzz1", "dzz2 -> +dzz2"],
         }
+        if cartesian:
+            string_transformations["dzz_cart"] = dzz_cart_orbs.copy()
         dzz_cart_reducable_basis = [2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2,]
         cart_bas = [
             dyz_orbs,
@@ -629,5 +655,6 @@ class Transformations:
             "operation_matrices": operation_matrices,
             "spanned_basis": spanned_basis,
             "orbital_basis": orbital_basis,
+            "string_transformations": string_transformations,
         }
         return return_dict
