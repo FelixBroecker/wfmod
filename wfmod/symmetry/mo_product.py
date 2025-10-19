@@ -106,13 +106,16 @@ class MOProduct(SALC):
         ao[idx] = 1.0
         return ao
 
-    def get_transformations_in_mo_basis(self):
-        """Get transformation matrices for each symmetry operation in the mo basis,"""
+    def get_transformations_in_mo_basis(self) -> dict:
+        """
+        Get transformation matrices for each symmetry operation in the mo basis.
+
+        Returns a dictionary with one operation matrix per symmetry operation.
+        """
 
         # transform mo basis in a more comparable basis
         # assigned as 1 s1 , 2 s1 , 1 px1, ... , 1 s2, 2 s2, 1 px2 ...
         # so they belong together if first number is the same
-        print(self.mo_basis)
         ao_label = []
         ao_number = []
         for mo in self.mo_basis:
@@ -121,40 +124,48 @@ class MOProduct(SALC):
             ao_label.append(ao + location)
             ao_number.append(number)
 
-        print("AO labels:" )
-        print(ao_label)
-        print("AO numbers:" )
-        print(ao_number)
+        # iterate over different angular momenta types  (s, px, py, pz, dxy ...)
+        transformation_groups = {}
+        for l_type in self.operation_matrices.keys():
+            transformation_groups[l_type] = {}
+            # find that in the ao_label and group them by their number
+            # to distinguish between them (e.g. 1s1 1s2 and 2s1 2s2)
+            for i, (number, label) in enumerate(zip(ao_number, ao_label)):
+                spherical, index = self.get_spherical_harmonic(label)
+                if l_type == spherical:
+                    transformation_groups.setdefault(l_type, {}).setdefault(f"{index}", []).append(i)
 
-        # iterate over different angular momenta basis (s, p, d ...)
-        tmp = {}
-        for angular_momentum, ao_basis in self.orbital_basisfunctions.items():
-            tmp[angular_momentum] = {}
-            # iterate over the bassis functions (e.g. s1, s2)
-            for basis_function in ao_basis:
-                # find that in the ao_label and group them by their number
-                # to distinguish between them (e.g. 1s1 1s2 and 2s1 2s2)
-                for i, (number, label) in enumerate(zip(ao_number,ao_label)):
-                    if basis_function == label:
-                        print(f"Found basis function {basis_function} {number}")
-                        tmp.setdefault(angular_momentum, {}).setdefault(f"{number}", []).append(i)
-        # TODO continue here to now get transformation matrices
-        print(tmp)
-
-        exit()
-        # find all s with same number
-        print(ao_label)
-        print(ao_number)
-
-        print(self.orbital_basis["s"])
-        print(self.orbital_basis.keys())
-        print("orbital basis functions:")
-        print(self.orbital_basisfunctions)
-        print(self.orbital_basisfunctions["s"])
-        print(self.operation_matrices["s"])
-
-
-
+        # get operation matrices in mo basis by mapping the string transformations
+        # allocate space for operation matrices in mo basis
+        operation_matrices_mo_basis = {
+            operation: np.zeros((len(self.mo_basis), len(self.mo_basis))) for operation in self.characTab.operations
+            }
+        # now get the transformtaions from the human readable string representation
+        # and map them into the mo basis that we have only one operation matrix for
+        # each symmetry operation for the full basis
+        pattern = r"([+-])(\w+)"
+        for l_type, _ in transformation_groups.items():
+            for mulliken, transformation in self.string_transformations[l_type].items():
+                print(mulliken, transformation)
+                for operation in transformation:
+                    # parse transformations
+                    func_val = operation.split(" -> ")
+                    sign, orbital = re.findall(
+                        pattern,
+                        func_val[1],
+                    )[0]
+                    start = func_val[0]  # e.g., "s1"
+                    sign, end = (1 if sign == "+" else -1, orbital)  # e.g., [(1, 's1')] where one is the sign
+                    print(start, end, sign)
+                    # start orbital
+                    l_type, idx = self.get_spherical_harmonic(start)
+                    start_indices = transformation_groups[l_type][idx]
+                    # end orbital after operation
+                    l_type, idx = self.get_spherical_harmonic(end)
+                    end_indices = transformation_groups[l_type][idx]
+                    for s_idx, e_idx in zip(start_indices, end_indices):
+                        operation_matrices_mo_basis[mulliken][e_idx][s_idx] = sign
+        return operation_matrices_mo_basis
 
 
     def transform_angular_basis_to_mo_basis(self, ao_product, aos_labels_in_product, mo_labels):
