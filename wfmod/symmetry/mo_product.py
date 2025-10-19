@@ -111,8 +111,16 @@ class MOProduct(SALC):
             for j, mo_2 in enumerate(mos):
                 prod = self.compute_mo_product([mo_1, mo_2])
                 idx = (i, j)
-                product_list.append([prod])
+                product_list.append(prod)
                 indices.append(idx)
+        # remove same lists:
+        for i in range(len(product_list)-1, -1, -1):
+            for j in range(i-1, -1, -1):
+                if product_list[i] == product_list[j]:
+                    del product_list[i]
+                    del indices[i]
+                    break
+
         return product_list, indices
 
     def get_ao_basis_function_by_idx(self, idx: int) -> np.array:
@@ -214,10 +222,13 @@ class MOProduct(SALC):
         result = self.sum_identical_terms(result)
         return result
 
-    def get_all_ao_product_projections(self, mo_product: list, target_symmetry: str):
+    def get_all_ao_product_projections(self, mo_product: list, target_symmetry: str, same_irrep_mos: list):
         """
         Compute all product of mos, project each ao product in the mo product
         with the projection operator. Assign the results back to linear combination of mo products.
+
+        Return: list of mo indices that absolute values form the linear combinations from the same_irrep_mos input.
+        The sign indicates the sign in the linear combination.
         """
         # compute mo product and get a sum of ao products
         ao_product_factors = self.compute_mo_product(mo_product)
@@ -253,15 +264,32 @@ class MOProduct(SALC):
 
         # compare to all combinations from the input mo product and assign terms
         # to the corresponding mo product to get linear combinations of mo products.
-        res = self.compute_all_possible_mo_products(mo_product)
+        # pass here all mos that belong to one irrep (e.g. all degenerate mos of one E)
+        mo_combinations = self.compute_all_possible_mo_products(same_irrep_mos)
 
+        #  mo_combinations[0] stores the mo combinations (e.g. 4 for 2 mos)
+        #  mo_combinations[0][0] stores the tuples of ao indices for the first mo product (e.g. mo1 * mo1)
 
-        print()
-        print(len(res[0][0]))
-        print(res[0][0])
+        # save the sign and the mo index for each term
+        # deduce from that the linear combination of mos
+        mo_assignments = []
+        for term in projected_ao_products:
+            found = False
+            for i, mo_product in enumerate(mo_combinations[0]):
+                for ao_product in mo_product:
+                    if ao_product == term[1]:
+                        mo_assignments.append(int(np.sign(term[0]) * i))
+                        found = True
+                        break
+                if found:
+                    break
+        print("MO assignments:")
+        print(mo_assignments)
+        unique_assignments = list(set(mo_assignments))
 
-        return []
-
+        # TODO handle the zero case properly
+        # TODO resolve bugs where false combinations result
+        return unique_assignments
 
     def assign_ao_products_to_mos(self, ao_products: list, ao_products_labels: list, mo_list: list, zero = 1e-12):
         """Assign ao products to mo products and return linear combinations of mos."""
