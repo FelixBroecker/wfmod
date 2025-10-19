@@ -16,6 +16,7 @@ class SALC:
         self.spanned_basis: dict[str, list] = {}
         self.orbital_basis: dict[str, list] = {}
         self.orbital_basisfunctions: dict[str, list] = {}
+        self.string_transformations: dict[str, dict] = {}
         self.proj_results: dict[str, dict[str, list]] = {}
         self.get_operations()
 
@@ -48,6 +49,7 @@ class SALC:
         self.orbital_basis["py"] = transformations["orbital_basis"]["py"]
         self.orbital_basis["pz"] = transformations["orbital_basis"]["pz"]
         self.orbital_basisfunctions = transformations["basis_functions"]
+        self.string_transformations = transformations["string_transformations"]
 
     def load_d4h_matrices(self):
         """load the opertion matrices for linear diatomics for
@@ -111,6 +113,7 @@ class SALC:
             self.orbital_basis["dzz"] = transformations["orbital_basis"]["dzz"]
             self.orbital_basis["d"] = transformations["orbital_basis"]["dzz"]
         self.orbital_basisfunctions = transformations["basis_functions"]
+        self.string_transformations = transformations["string_transformations"]
 
 
     def get_symmetry_adapted_basis(self, orbital):
