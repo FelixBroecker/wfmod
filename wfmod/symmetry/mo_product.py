@@ -181,8 +181,6 @@ class MOProduct(SALC):
         order = self.characTab.order
         mulliken_letter = re.search(r'([A-Z]+)', target_symmetry).group(0)
         dim = self.characTab.get_dimension(mulliken_letter)
-        print("order", order)
-        print("dim", dim)
         factor = dim / order
         result = [[factor, []] for _ in range(len(self.mo_operation_matrices.values()))]  # initialize result
         for i, ao in enumerate(ao_product):
@@ -192,17 +190,10 @@ class MOProduct(SALC):
                     result[j][0] *= character
                 function = np.dot(operation, ao[-1])
                 sign, function = self.get_sign(function)
-                print("character:", character)
                 result[j][0] *= sign
                 result[j][1].append(function)
-
-        print("Before summation")
-        for r in result:
-            print(r)
-        res = self.sum_identical_terms(result)
-        print("After summation")
-        for r in res:
-            print(r)
+        result = self.sum_identical_terms(result)
+        return result
 
     def transform_angular_basis_to_mo_basis(self, ao_product, aos_labels_in_product, mo_labels):
         """Transform from angular basis to mo basis."""
