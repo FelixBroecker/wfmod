@@ -435,7 +435,7 @@ class Transformations:
             "1 sd'": ["dxz1 -> +dyz1", "dxz2 -> +dyz2"],
             "1 sd''": ["dxz1 -> -dyz1", "dxz2 -> -dyz2"],
         }
-        string_transformations["dxz"] = dxz_orbs
+        string_transformations["dxz"] = dxz_orbs.copy()
         dxz_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, +2, -2]
 
         dyz_orbs = {
