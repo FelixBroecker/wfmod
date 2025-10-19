@@ -125,7 +125,7 @@ class MOProduct(SALC):
             ao_number.append(number)
 
         # iterate over different angular momenta types  (s, px, py, pz, dxy ...)
-        transformation_groups = {}
+        transformation_groups: dict[str, dict[str, list[int]]] = {}
         for l_type in self.operation_matrices.keys():
             transformation_groups[l_type] = {}
             # find that in the ao_label and group them by their number
@@ -146,7 +146,6 @@ class MOProduct(SALC):
         pattern = r"([+-])(\w+)"
         for l_type, _ in transformation_groups.items():
             for mulliken, transformation in self.string_transformations[l_type].items():
-                print(mulliken, transformation)
                 for operation in transformation:
                     # parse transformations
                     func_val = operation.split(" -> ")
@@ -156,7 +155,6 @@ class MOProduct(SALC):
                     )[0]
                     start = func_val[0]  # e.g., "s1"
                     sign, end = (1 if sign == "+" else -1, orbital)  # e.g., [(1, 's1')] where one is the sign
-                    print(start, end, sign)
                     # start orbital
                     l_type, idx = self.get_spherical_harmonic(start)
                     start_indices = transformation_groups[l_type][idx]
@@ -203,8 +201,7 @@ class MOProduct(SALC):
         sign = self.get_sign(ao_product)
         return [sign] + res
 
-    def get_projection_of_mo_product(self, mo_list: list, zero=1e-12):
-        irrep="A1g"
+    def get_projection_of_mo_product(self, mo_list: list, target_symmetry, zero=1e-12):
         for mo in mo_list:
             self.print_mo(mo)
 
