@@ -101,6 +101,20 @@ class MOProduct(SALC):
 
         return res
 
+    def compute_all_possible_mo_products(self, mos: list):
+        """
+        Compute all possible products of input molecular orbitals.
+        e.g. for two mos: mo1 * mo1, mo1 * mo2, mo2 * mo1, mo2 * mo2"""
+        product_list = []
+        indices = []
+        for i, mo_1 in enumerate(mos):
+            for j, mo_2 in enumerate(mos):
+                prod = self.compute_mo_product([mo_1, mo_2])
+                idx = (i, j)
+                product_list.append([prod])
+                indices.append(idx)
+        return product_list, indices
+
     def get_ao_basis_function_by_idx(self, idx: int) -> np.array:
         """Assign the transformations in ao basis to mo basis."""
         ao = np.zeros(len(self.mo_basis))
@@ -225,6 +239,9 @@ class MOProduct(SALC):
         for ao_product in ao_product_factors_converted:
             projected_ao_products += self.get_projection_of_ao_product(ao_product, target_symmetry)
 
+        # sum identical terms from different mo products
+        projected_ao_products = self.sum_identical_terms(projected_ao_products)
+
         # convert projected ao basis functions back to indices
         for i, term in enumerate(projected_ao_products):
             tmp = []
@@ -236,6 +253,12 @@ class MOProduct(SALC):
 
         # compare to all combinations from the input mo product and assign terms
         # to the corresponding mo product to get linear combinations of mo products.
+        res = self.compute_all_possible_mo_products(mo_product)
+
+
+        print()
+        print(len(res[0][0]))
+        print(res[0][0])
 
         return []
 
