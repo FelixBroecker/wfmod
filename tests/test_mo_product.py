@@ -6,7 +6,7 @@ from wfmod.symmetry.mo_product import MOProduct
 @pytest.fixture
 def moProd():
     """Fixture to provide a MOProduct instance for all tests"""
-    point_group = "d2h"
+    point_group = "d4h_expanded"
     mo_basis = [
         "C1_1s", "C1_2s", "C1_3s", "C1_4s", "C1_5s", "C1_1px", "C1_1py", "C1_1pz",
         "C1_2px", "C1_2py", "C1_2pz", "C1_3px", "C1_3py", "C1_3pz", "C1_1dzz", "C1_1dxz",
@@ -147,7 +147,6 @@ def test_sum_all_functions(moProd, a, expected):
             assert np.array_equal(res_arr, exp_arr), f"Arrays differ: {res_arr} vs {exp_arr}"
 
 
-
 @pytest.mark.parametrize("a,expected", [
    (
         [
@@ -191,3 +190,36 @@ def test_compute_mo_product(moProd, a, expected):
 
     for res, exp in zip(result, expected):
         assert res == exp, f"Tuples differ: {res} vs {exp}"
+
+
+# test transformation matrix by performing some transformations with it
+@pytest.mark.parametrize("a,b,expected", [
+   (
+        "1 E",
+        np.eye(1, 38, 0).flatten(),  # 1s orbital on atom 1 of a linear molecule
+        np.eye(1, 38, 0).flatten(),
+    ),
+    (
+        "1 C2",
+        np.eye(1, 38, 5).flatten(),  # 1px orbital on atom 1 of a linear molecule
+        np.eye(1, 38, 5).flatten() * -1,
+    ),
+    (
+        "1 i",
+        np.eye(1, 38, 13).flatten(),  # 3pz orbital on atom 1 of a linear molecule
+        np.eye(1, 38, 32).flatten() * -1,
+    ),
+    (
+        "1 S4-",
+        np.eye(1, 38, 16).flatten(),  # 1dyz orbital on atom 1 of a linear molecule
+        np.eye(1, 38, 34).flatten(),
+    )
+
+])
+def test_get_transformations_in_mo_basis(moProd, a, b, expected):
+    """Test get_transformations_in_mo_basis method of MOProduct class"""
+    transformations = moProd.get_transformations_in_mo_basis()
+    array_result = np.dot(transformations[a], b)
+
+    # Compare arrays elementwise
+    assert np.array_equal(array_result, expected), f"Arrays differ: {array_result} vs {expected}"
