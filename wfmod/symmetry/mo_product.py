@@ -9,6 +9,7 @@ class MOProduct(SALC):
     """Class to get symmetry adapted product basis functions of molecular orbitals."""
     def __init__(self, point_group: str, basis: list, cartesian: bool = False):
         super().__init__(point_group, basis, cartesian)
+        self.mo_operation_matrices: dict[str, np.array] = {}
 
     def add_two_functions(self,
                             f1: list[int, np.ndarray],
@@ -163,8 +164,45 @@ class MOProduct(SALC):
                     end_indices = transformation_groups[l_type][idx]
                     for s_idx, e_idx in zip(start_indices, end_indices):
                         operation_matrices_mo_basis[mulliken][e_idx][s_idx] = sign
+        self.mo_operation_matrices = operation_matrices_mo_basis
         return operation_matrices_mo_basis
 
+    def get_projection_of_ao_product(self, ao_product: list, target_symmetry: str, zero=1e-12):
+        """
+        Use Projection operator to get symmetry adapted mo product. Apply the projection operator therefore
+        on each factor of the product of aos that result from a product of mos.
+
+        Returns the projected mo products as list of lists of numpy arrays."""
+
+        # apply projection operator
+        # P^irrep = ( dimension/order ) sum_over_operations [ chi^irrep(op) * R(op) ]
+        # (eq. 5.24 Atkins Friedman 2011. Ed. 5; Example 5.9)
+        print(target_symmetry)
+        order = self.characTab.order
+        mulliken_letter = re.search(r'([A-Z]+)', target_symmetry).group(0)
+        dim = self.characTab.get_dimension(mulliken_letter)
+        print("order", order)
+        print("dim", dim)
+        factor = dim / order
+        result = [[factor, []] for _ in range(len(self.mo_operation_matrices.values()))]  # initialize result
+        for i, ao in enumerate(ao_product):
+            for j, operation in enumerate(self.mo_operation_matrices.values()):
+                if not i:
+                    character = self.characTab.characters[target_symmetry][j]
+                    result[j][0] *= character
+                function = np.dot(operation, ao[-1])
+                sign, function = self.get_sign(function)
+                print("character:", character)
+                result[j][0] *= sign
+                result[j][1].append(function)
+
+        print("Before summation")
+        for r in result:
+            print(r)
+        res = self.sum_identical_terms(result)
+        print("After summation")
+        for r in res:
+            print(r)
 
     def transform_angular_basis_to_mo_basis(self, ao_product, aos_labels_in_product, mo_labels):
         """Transform from angular basis to mo basis."""
@@ -200,89 +238,6 @@ class MOProduct(SALC):
 
         sign = self.get_sign(ao_product)
         return [sign] + res
-
-    def get_projection_of_mo_product(self, mo_list: list, target_symmetry, zero=1e-12):
-        for mo in mo_list:
-            self.print_mo(mo)
-
-        res = []
-
-        # Enumerate over all index combinations
-        for combo in itertools.product(*[enumerate(mo) for mo in mo_list]):
-            indices = tuple(idx for idx, _ in combo)
-            values = [val for _, val in combo]
-
-            result = np.prod(values)  # multiply all values together
-            if result > zero:
-                res.append(indices)
-
-        # get AO for each index
-        products_in_input_basis = []
-        for tup in res:
-            tmp = []
-            for idx in tup:
-                tmp.append(self.mo_basis[idx])
-            products_in_input_basis.append(tuple(tmp))
-
-
-        # apply symmetry operator to each factor of each product
-        # as example do for first product
-        results = []
-        results_mo_labels = []
-        for product in products_in_input_basis:
-
-            aos_labels_in_product = []
-            for factor in product:
-                ao, location = self.get_spherical_harmonic(factor)
-                aos_labels_in_product.append(ao + location)
-
-
-            print("Applying symmetry operators to product:")
-            projection_result = self.apply_symmetry_operator_on_product(aos_labels_in_product, irrep)
-            print(projection_result)
-            print(aos_labels_in_product)
-            print(product)
-
-            projection_result_labels = []
-            for i, ao in enumerate(projection_result):
-                res = []
-
-                # determine angular momentum
-                angular_momentum = ""
-                for l_type in self.orbital_basisfunctions.keys():
-                    if l_type in aos_labels_in_product[i]:
-                        angular_momentum = l_type
-                        break
-
-
-                for function in ao:
-                    res.append(self.get_ao_name(function, angular_momentum))
-                projection_result_labels.append(res)
-
-            print("reshape")
-
-            print(np.column_stack(projection_result_labels))
-            print()
-
-            # for tmp in projection_result:
-            #     for t in tmp:
-            #         for val in t:
-            #             print(f"{val:8.4f}", end=" ")
-            #         print()
-            #     print()
-
-            combined = [list(x) for x in zip(*projection_result)]
-            print(combined[0])
-            # reassign aos to in the mo list
-            results.append(self.sum_identical_terms(combined))
-
-            print("combined results:")
-            mo_labels = []
-            for res in combined:
-                tmp = self.transform_angular_basis_to_mo_basis(res, aos_labels_in_product, product)
-                mo_labels.append(tmp)
-            results_mo_labels.append(mo_labels)
-        return results, results_mo_labels
 
     def assign_ao_products_to_mos(self, ao_products: list, ao_products_labels: list, mo_list: list, zero = 1e-12):
         """Assign ao products to mo products and return linear combinations of mos."""
