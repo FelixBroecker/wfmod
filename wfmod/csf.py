@@ -782,6 +782,37 @@ to parse CSF energy contributions."
         res = excited_determinants
         return res
 
+    def get_configurations_from_determinants(
+        self,
+        determinant_basis,
+    ):
+        """convert list of determinants to list of configurations
+        in amolqc format without spin information"""
+        configurations = []
+        for det in determinant_basis:
+            config = []
+            for electron in det:
+                config.append(abs(electron))
+            configurations.append(config)
+        return configurations
+
+    def remove_duplicate_configurations(self, configurations, sort_electrons=True):
+        """
+        Remove duplicate configurations from list of configurations.
+        When sort_electrons is True, each configuration is sorted before checking for duplicates.
+        The sign information gets lost in this process.
+        """
+        seen = set()
+        unique_configs = []
+        for config in configurations:
+            if sort_electrons:
+                config = sorted(config)
+            tuple_config = tuple(config)
+            if tuple_config not in seen:
+                seen.add(tuple_config)
+                unique_configs.append(config)
+        return unique_configs
+
     def get_unique_csfs(
         self,
         determinant_basis,
