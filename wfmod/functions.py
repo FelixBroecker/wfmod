@@ -371,3 +371,70 @@ class Functions(sCI):
             file_name=f"{output_wavefunction}.wf",
             wftype=wftype,
         )
+
+    def wfFromConfs(
+            self,
+            n_electrons,
+            quantum_number_s,
+            quantum_number_ms,
+            input_wavefunction,
+            output_wavefunction="",
+            wftype="csf",
+            verbose=False):
+        """Get configurations from wave function and take these to create a new wave function."""
+        # get determinants from wave function
+
+        if not output_wavefunction:
+            output_wavefunction = f"{input_wavefunction}_from_confs"
+
+        if wftype == "csf":
+            self.csf2det(
+                input_wavefunction,
+                n_electrons,
+                output_wavefunction=f"tmp",
+                verbose=verbose,
+                coeffs_to_zero=True,
+            )
+            _, determinants, CI_coefficients, wfpretext = (
+                self.read_AMOLQC_csfs(
+                    f"tmp.wf", n_electrons, wftype="det"
+                )
+                )
+        else:
+            _, determinants, CI_coefficients, wfpretext = (
+                self.read_AMOLQC_csfs(
+                    f"{input_wavefunction}.wf", n_electrons, wftype="det"
+                ))
+
+        # remove spin from determinants to get configurations
+        configurations = self.get_configurations_from_determinants(determinants)
+
+        # remove duplicate configurations
+        configurations = self.remove_duplicate_configurations(configurations)
+
+        # form new csfs based on this configurations
+        csf_coefficients, csfs = self.get_unique_csfs(
+            configurations, quantum_number_s, quantum_number_ms
+        )
+
+        # sort determinants in Amolqc format
+        csf_coefficients, csfs = self.sort_determinants_in_csfs(
+            csf_coefficients, csfs
+        )
+
+        if verbose:
+            print()
+            print(
+                f"Number of csfs generated from {len(configurations)} configurations is "
+                f"{len(csfs)}."
+            )
+            print("Write wave function.")
+        # generate MO initial list
+        CI_coefficients = [1 if n == 0 else 0 for n in range(len(csfs))]
+        self.write_AMOLQC(
+                csf_coefficients,
+                csfs,
+                CI_coefficients,
+                pretext=wfpretext,
+                file_name=f"{output_wavefunction}.wf",
+            )
