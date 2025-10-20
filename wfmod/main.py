@@ -72,6 +72,7 @@ def main():
         "sort_wf": funcs.sort_wf,
         "det2csf": funcs.det2csf,
         "add_singles": funcs.add_singles,
+        "wfFromConfs": funcs.wfFromConfs
     }
 
     CLASS_REGISTRY = {
