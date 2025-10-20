@@ -8,7 +8,7 @@ from salc import SALC
 
 if __name__ == "__main__":
     # tests in development stage
-    data_set = "c2_sz"
+    data_set = "c2_tz"
     cartesian = False
     if data_set == "c2_sz":
         # C2 in minimal basis
@@ -132,16 +132,22 @@ if __name__ == "__main__":
     # test mo products
     moProd = MOProduct(point_group, orbital_basis, cartesian=cartesian)
     print("mo")
-    idx1 = 5
-    idx2 = 7
-    idx3 = 2
-    print(mos[idx1])
-    print(mos[idx2])
-    print(mos[idx3])
-    res = moProd.compute_mo_product([mos[idx1], mos[idx2], mos[idx3]])
+    _ = moProd.get_transformations_in_mo_basis()
+    ao_1 = np.eye(1, 38, 6).flatten()  # 1px orbital on atom 1 of a linear molecule
+    ao_1 = moProd.get_sign(ao_1)
+    ao_2 = np.eye(1, 38, 5).flatten()
+    ao_2 = moProd.get_sign(ao_2)
+    print("ao_1", ao_1)
+    print("ao_2", ao_2)
+    mo_product = [mos[5], mos[5]]
+    same_irrep_mos = [mos[4], mos[5]]
+
+    print("start projection")
+    linear_combination = moProd.get_all_ao_product_projections(mo_product, "B1g", same_irrep_mos)
+    print(linear_combination)
 
     # moProd.assign_ao_products_to_mos(prod, labels, [mos[4], mos[5]])
-    print(res)
 
-    exit()
+    # print(len(moProd.mo_basis))
+
     # test for identical terms in mo product
