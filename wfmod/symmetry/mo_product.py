@@ -227,7 +227,7 @@ class MOProduct(SALC):
         Compute all product of mos, project each ao product in the mo product
         with the projection operator. Assign the results back to linear combination of mo products.
 
-        Return: list of mo indices that absolute values form the linear combinations from the same_irrep_mos input.
+        Return: list of tuples (sign, mo index) that specify the linear combination of mos from the same_irrep_mos input.
         The sign indicates the sign in the linear combination.
         """
         # compute mo product and get a sum of ao products
@@ -271,19 +271,24 @@ class MOProduct(SALC):
 
         # save the sign and the mo index for each term
         # deduce from that the linear combination of mos
+        # use i as index +1 for mo index to distinguish between +0 and -0
         mo_assignments = []
         for term in projected_ao_products:
             found = False
             for i, mo_product in enumerate(mo_combinations[0]):
                 for ao_product in mo_product:
                     if ao_product == term[1]:
-                        mo_assignments.append(int(np.sign(term[0]) * i))
+                        mo_assignments.append(int(np.sign(term[0]) * (i+1)))
                         found = True
                         break
                 if found:
                     break
         unique_assignments = list(set(mo_assignments))
 
+        # subtravt 1 to get the real mo indices again and keep signs
+        return_format = []
+        for val in unique_assignments:
+            return_format.append((np.sign(val), abs(val)-1))
         # TODO handle the zero case properly
         # TODO resolve bugs where false combinations result
-        return unique_assignments
+        return return_format
