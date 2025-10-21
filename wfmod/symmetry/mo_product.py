@@ -200,7 +200,9 @@ class MOProduct(SALC):
         Use Projection operator to get symmetry adapted mo product. Apply the projection operator therefore
         on each factor of the product of aos that result from a product of mos.
 
-        Returns the projected mo products as list of lists of numpy arrays."""
+        Returns the projected mo products as list of lists of numpy arrays.
+
+        """
 
         # apply projection operator
         # P^irrep = ( dimension/order ) sum_over_operations [ chi^irrep(op) * R(op) ]
@@ -222,7 +224,11 @@ class MOProduct(SALC):
         result = self.sum_identical_terms(result)
         return result
 
-    def get_all_ao_product_projections(self, mo_product: list, target_symmetry: str, same_irrep_mos: list):
+    def get_all_ao_product_projections(
+            self, mo_product: list,
+            target_symmetry: str,
+            same_irrep_mos: list
+            ) -> list[tuple[int, int]]:
         """
         Compute all product of mos, project each ao product in the mo product
         with the projection operator. Assign the results back to linear combination of mo products.
@@ -285,10 +291,13 @@ class MOProduct(SALC):
                     break
         unique_assignments = list(set(mo_assignments))
 
-        # subtravt 1 to get the real mo indices again and keep signs
+        # return empty list if the result is zero
+        if len(unique_assignments) == 1 and unique_assignments[0] == 0:
+            return []
+
+        # subtract 1 to get the real mo indices again and keep signs
         return_format = []
         for val in unique_assignments:
             return_format.append((np.sign(val), abs(val)-1))
-        # TODO handle the zero case properly
         # TODO resolve bugs where false combinations result
         return return_format
