@@ -216,16 +216,16 @@ class Transformations:
 
         px_orbs = {
             "1 E": ["px1 -> +px1", "px2 -> +px2"],
-            "1 C4_z+": ["px1 -> +py1", "px2 -> +py2"],
-            "1 C4_z-": ["px1 -> -py1", "px2 -> -py2"],
+            "1 C4_z+": ["px1 -> -py1", "px2 -> +py2"],
+            "1 C4_z-": ["px1 -> +py1", "px2 -> -py2"],
             "1 C2": ["px1 -> -px1", "px2 -> -px2"],
-            "1 C2''x": ["px1 -> +px2", "px2 -> +px1"],
-            "1 C2''y": ["px1 -> -px2", "px2 -> -px1"],
+            "1 C2''x": ["px1 -> -px2", "px2 -> +px1"],
+            "1 C2''y": ["px1 -> +px2", "px2 -> -px1"],
             "1 C2'''1": ["px1 -> +py2", "px2 -> +py1"],
             "1 C2'''2": ["px1 -> -py2", "px2 -> -py1"],
             "1 i": ["px1 -> -px2", "px2 -> -px1"],
-            "1 S4+": ["px1 -> +py2", "px2 -> +py1"],
-            "1 S4-": ["px1 -> -py2", "px2 -> -py1"],
+            "1 S4+": ["px1 -> -py2", "px2 -> +py1"],
+            "1 S4-": ["px1 -> +py2", "px2 -> -py1"],
             "1 sh": ["px1 -> +px2", "px2 -> +px1"],
             "1 sv'": ["px1 -> -px1", "px2 -> -px2"],
             "1 sv''": ["px1 -> +px1", "px2 -> +px2"],
@@ -234,7 +234,7 @@ class Transformations:
         }
         string_transformations["px"] = px_orbs.copy()
         orb_empty = np.zeros((len(p_orbital_basis), len(p_orbital_basis)))
-        px_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, -2, -2, 2, 2]
+        px_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, -2, 2, 2, -2]
 
         # convert to transformation matrix
         for mulliken, operations in px_orbs.items():
@@ -261,7 +261,7 @@ class Transformations:
             "1 sd''": ["py1 -> -px1", "py2 -> -px2"],
         }
         string_transformations["py"] = py_orbs.copy()
-        py_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, -2, -2]
+        py_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 2, -2, +2, -2]
         # convert to transformation matrix
         for mulliken, operations in py_orbs.items():
             py_orbs[mulliken] = Transformations.get_transformation_matrix(
