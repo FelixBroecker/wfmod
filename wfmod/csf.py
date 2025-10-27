@@ -833,29 +833,24 @@ to parse CSF energy contributions."
                 determinant_basis[i][j] = abs(orbital)
         # keep only unique determinants
         seen = set()
-        det_basis_temp = []
+        configurations = []
         for sublist in determinant_basis:
             tuple_sublist = tuple(sublist)
             if tuple_sublist not in seen:
                 seen.add(tuple_sublist)
-                det_basis_temp.append(sublist)
-
+                configurations.append(sublist)
         det_basis = []
-        closed_shell_idx = []
-        open_shell_idx = []
         csf_determinants_closed_shell = []
         csf_coefficients_closed_shell = []
         # move single SD's that are singulett spin eigenfunctions directly in list csfs
         # and move all other determinants in det_basis
-        for i, det in enumerate(det_basis_temp):
+        for i, det in enumerate(configurations):
             if self.is_singulett(det):
                 # add spin again
                 det = [electron * (-1) ** n for n, electron in enumerate(det)]
-                closed_shell_idx.append(i)
                 csf_determinants_closed_shell.append([det])
                 csf_coefficients_closed_shell.append([1.0])
             else:
-                open_shell_idx.append(i)
                 det_basis.append(det)
 
         csf_determinants_open_shell = []
@@ -904,27 +899,16 @@ to parse CSF energy contributions."
 
         csf_determinants = []
         csf_coefficients = []
-        closed_idx = 0
-        open_idx = 0
         # combine closed shell and openshell according to the original order
-        for i in range(len(det_basis_temp)):
-            if i in closed_shell_idx:
-                csf_determinants.append(
-                    csf_determinants_closed_shell[closed_idx]
-                )
-                csf_coefficients.append(
-                    csf_coefficients_closed_shell[closed_idx]
-                )
-                closed_idx += 1
+        while configurations:
+            if len(csf_coefficients_closed_shell) > 0 and np.array_equal(np.array(configurations[0]), np.abs(np.array(csf_determinants_closed_shell[0][0]))):
+                csf_determinants.append(csf_determinants_closed_shell.pop(0))
+                csf_coefficients.append(csf_coefficients_closed_shell.pop(0))
+            elif len(csf_coefficients_open_shell) > 0 and np.array_equal(np.array(configurations[0]), np.abs(np.array(csf_determinants_open_shell[0][0]))):
+                csf_determinants.append(csf_determinants_open_shell.pop(0))
+                csf_coefficients.append(csf_coefficients_open_shell.pop(0))
             else:
-                csf_determinants.append(
-                    csf_determinants_open_shell[open_idx]
-                )
-                csf_coefficients.append(
-                    csf_coefficients_open_shell[open_idx]
-                )
-                open_idx += 1
-        print(csf_determinants[0:10])
+                configurations.pop(0)
         return csf_coefficients, csf_determinants
 
     def get_initial_wf(
