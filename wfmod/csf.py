@@ -821,9 +821,7 @@ to parse CSF energy contributions."
     ):
         """clean determinant basis to obtain unique determinants to
         construct same csf only once"""
-        csf_determinants = []
-        csf_coefficients = []
-        N = len(determinant_basis[0])
+
         # TODO sort determinants in determinant basis
         for i, _ in enumerate(determinant_basis):
             determinant_basis[i] = sorted(
@@ -843,17 +841,25 @@ to parse CSF energy contributions."
                 det_basis_temp.append(sublist)
 
         det_basis = []
+        closed_shell_idx = []
+        open_shell_idx = []
+        csf_determinants_closed_shell = []
+        csf_coefficients_closed_shell = []
         # move single SD's that are singulett spin eigenfunctions directly in list csfs
         # and move all other determinants in det_basis
-        for det in det_basis_temp:
+        for i, det in enumerate(det_basis_temp):
             if self.is_singulett(det):
                 # add spin again
                 det = [electron * (-1) ** n for n, electron in enumerate(det)]
-                csf_determinants.append([det])
-                csf_coefficients.append([1.0])
+                closed_shell_idx.append(i)
+                csf_determinants_closed_shell.append([det])
+                csf_coefficients_closed_shell.append([1.0])
             else:
+                open_shell_idx.append(i)
                 det_basis.append(det)
 
+        csf_determinants_open_shell = []
+        csf_coefficients_open_shell = []
         # add spin for singletts
         # check which electrons are in a double occupied orbital and mask them
         masked_electrons = []
@@ -871,7 +877,7 @@ to parse CSF energy contributions."
             n_uncoupled = sum(mask)
             # get spin eigenfunctions for corresponding determinant
             (
-                geneological_path,
+                _,
                 primitive_spin_summands,
                 coupling_coefficients,
             ) = self.spinfuncs.get_all_csfs(n_uncoupled, S, M_s)
@@ -893,8 +899,32 @@ to parse CSF energy contributions."
                             )
                             idx_singlet_electron += 1
                     csf_tmp.append(det_tmp)
-                csf_determinants.append(csf_tmp)
-                csf_coefficients.append(coupling_coefficients[i])
+                csf_determinants_open_shell.append(csf_tmp)
+                csf_coefficients_open_shell.append(coupling_coefficients[i])
+
+        csf_determinants = []
+        csf_coefficients = []
+        closed_idx = 0
+        open_idx = 0
+        # combine closed shell and openshell according to the original order
+        for i in range(len(det_basis_temp)):
+            if i in closed_shell_idx:
+                csf_determinants.append(
+                    csf_determinants_closed_shell[closed_idx]
+                )
+                csf_coefficients.append(
+                    csf_coefficients_closed_shell[closed_idx]
+                )
+                closed_idx += 1
+            else:
+                csf_determinants.append(
+                    csf_determinants_open_shell[open_idx]
+                )
+                csf_coefficients.append(
+                    csf_coefficients_open_shell[open_idx]
+                )
+                open_idx += 1
+        print(csf_determinants[0:10])
         return csf_coefficients, csf_determinants
 
     def get_initial_wf(
