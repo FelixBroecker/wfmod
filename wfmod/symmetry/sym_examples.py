@@ -134,16 +134,16 @@ if __name__ == "__main__":
     print("mo")
     _ = moProd.get_transformations_in_mo_basis()
     ao_1 = np.eye(1, 38, 6).flatten()  # 1px orbital on atom 1 of a linear molecule
-    ao_1 = moProd.get_sign(ao_1)
+    # ao_1 = moProd.get_sign(ao_1)
     ao_2 = np.eye(1, 38, 5).flatten()
-    ao_2 = moProd.get_sign(ao_2)
+    # ao_2 = moProd.get_sign(ao_2)
     print("ao_1", ao_1)
     print("ao_2", ao_2)
-    mo_product = [mos[5], mos[5]]
-    same_irrep_mos = [mos[4], mos[5]]
+    mo_product = [ao_2, ao_2]
+    same_irrep_mos = [ao_1, ao_2]
 
     print("start projection")
-    linear_combination = moProd.get_all_ao_product_projections(mo_product, "B1g", same_irrep_mos)
+    linear_combination = moProd.get_all_ao_product_projections(mo_product, "A1g", same_irrep_mos)
     print(linear_combination)
 
     # moProd.assign_ao_products_to_mos(prod, labels, [mos[4], mos[5]])
