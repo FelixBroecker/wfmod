@@ -106,6 +106,15 @@ class Functions(sCI):
     ):
         """Sort wave function by criterion."""
 
+        # check if valid sort criterion
+        valid_criteria = [
+            "ci_coefficient",
+            "by_excitation",
+            "random",
+            "unchanged",
+        ]
+        assert criterion in valid_criteria, f"Invalid sorting criterion: {criterion}"
+
         if wftype == "det":
             # TODO sorting of determinant wave functions
             print(
@@ -162,6 +171,9 @@ class Functions(sCI):
                     initial_determinant,
                 )
             )
+        elif criterion == "unchanged":
+            if verbose:
+                print("Keep wave function order unchanged.")
 
         if not output_wavefunction:
             output_wavefunction = f"{input_wavefunction}_out"
