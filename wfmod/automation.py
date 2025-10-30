@@ -27,6 +27,7 @@ class Automation:
         criterion="ci_coefficient",
         partition="p64",
         n_tasks="704",
+        amolqc_path="/home/broecker/bin/Amolqc/build/bin/amolqc",
         keep_all_singles=False,
         max_csfs=3000,
         verbose=True,
@@ -48,6 +49,7 @@ class Automation:
         self.verbose = verbose
         self.partition = partition
         self.n_tasks = n_tasks
+        self.amolqc_path = amolqc_path
         self.criterion = criterion
         self.n_min = n_min
         self.threshold = threshold
@@ -62,8 +64,7 @@ class Automation:
         job_name,
         n_tasks,
         ami_name,
-        jobfile_name="amolqc_job",
-        path="/home/broecker/bin/Amolqc/build/bin/amolqc",
+        jobfile_name="amolqc_job"
     ):
         with open(f"{jobfile_name}", "w") as printfile:
             printfile.write(
@@ -74,7 +75,7 @@ class Automation:
 #SBATCH --ntasks={n_tasks}
 #SBATCH --ntasks-per-core=1
 # Befehle die ausgeführt werden sollen:
-mpiexec -np {n_tasks} {path} {ami_name}.ami
+mpiexec -np {n_tasks} {self.amolqc_path} {ami_name}.ami
 """
             )
 
@@ -978,6 +979,7 @@ blockwise opimization is finished."
         final_ami,
         energy_ami="",
         max_blocks=1000,
+        do_max_blocks=False
     ):
         #
         # initial block with adding jastrow and optimizing jastrow
@@ -990,8 +992,9 @@ blockwise opimization is finished."
         n_blocks = math.ceil(
             (self.n_all_csfs - self.blocksize) / (self.blocksize - self.n_min)
         )
-        if self.threshold_type == "sum_up":
+        if self.threshold_type == "sum_up" or do_max_blocks:
             n_blocks = max_blocks
+
         # flex = True
         # if flex:
         #     n_blocks = max_blocks
