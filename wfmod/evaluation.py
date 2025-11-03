@@ -331,7 +331,7 @@ class Evaluation:
         )
 
         # count total number of each degree of excitation
-        counter = [0 for i in range(max_degree)]
+        counter = [0 for _ in range(max_degree)]
 
         if print_file:
             with open("excitation.out", "w") as reffile:
