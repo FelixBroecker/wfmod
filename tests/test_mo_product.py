@@ -213,6 +213,11 @@ def test_compute_mo_product(moProd, a, expected):
         "1 S4-",
         np.eye(1, 38, 16).flatten(),  # 1dyz orbital on atom 1 of a linear molecule
         np.eye(1, 38, 34).flatten(),
+    ),
+    (
+        "1 C4_z+",
+        np.eye(1, 38, 5).flatten() + np.eye(1, 38, 24).flatten(),  # 1px1 and 1px2 orbital on atom 1 + 2 of a linear molecule
+        (np.eye(1, 38, 6).flatten() + np.eye(1, 38, 25).flatten()) * -1,
     )
 ])
 def test_get_transformations_in_mo_basis(moProd, a, b, expected):
