@@ -131,7 +131,9 @@ class MOProduct(SALC):
 
     def get_idx_by_ao_basis_function(self, ao_func) -> int:
         """Get the index of an ao basis function in the mo basis."""
-        ao_func = np.array(ao_func)
+        if not isinstance(ao_func, np.ndarray):
+            ao_func = np.array(ao_func)
+        print(ao_func)
         idx = int(np.where(ao_func == 1.0)[0])
         return idx
 
@@ -266,12 +268,14 @@ class MOProduct(SALC):
                 idx = self.get_idx_by_ao_basis_function(ao)
                 tmp.append(idx)
             projected_ao_products[i][1] = tuple(tmp)
-
         # compare to all combinations from the input mo product and assign terms
         # to the corresponding mo product to get linear combinations of mo products.
         # pass here all mos that belong to one irrep (e.g. all degenerate mos of one E)
         mo_combinations = self.compute_all_possible_mo_products(same_irrep_mos)
+        print(projected_ao_products)
+        print("mo combinations", mo_combinations)
 
+        print("projected ao products", projected_ao_products)
         #  mo_combinations[0] stores the mo combinations (e.g. 4 for 2 mos)
         #  mo_combinations[0][0] stores the tuples of ao indices for the first mo product (e.g. mo1 * mo1)
 
@@ -283,7 +287,7 @@ class MOProduct(SALC):
             found = False
             for i, mo_product in enumerate(mo_combinations[0]):
                 for ao_product in mo_product:
-                    if ao_product == term[1]:
+                    if ao_product == term[1] and term[0] != 0:
                         mo_assignments.append(int(np.sign(term[0]) * (i+1)))
                         found = True
                         break
