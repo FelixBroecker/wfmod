@@ -419,45 +419,45 @@ class Transformations:
 
         dxz_orbs = {
             "1 E": ["dxz1 -> +dxz1", "dxz2 -> +dxz2"],
-            "1 C4_z+": ["dxz1 -> +dyz1", "dxz2 -> +dyz2"],
-            "1 C4_z-": ["dxz1 -> -dyz1", "dxz2 -> -dyz2"],
+            "1 C4_z+": ["dxz1 -> -dyz1", "dxz2 -> -dyz2"],
+            "1 C4_z-": ["dxz1 -> +dyz1", "dxz2 -> +dyz2"],
             "1 C2": ["dxz1 -> -dxz1", "dxz2 -> -dxz2"],
             "1 C2''x": ["dxz1 -> -dxz2", "dxz2 -> -dxz1"],
             "1 C2''y": ["dxz1 -> +dxz2", "dxz2 -> +dxz1"],
-            "1 C2'''1": ["dxz1 -> +dyz2", "dxz2 -> +dyz1"],
-            "1 C2'''2": ["dxz1 -> -dyz2", "dxz2 -> -dyz1"],
+            "1 C2'''1": ["dxz1 -> -dyz2", "dxz2 -> -dyz1"],
+            "1 C2'''2": ["dxz1 -> +dyz2", "dxz2 -> +dyz1"],
             "1 i": ["dxz1 -> +dxz2", "dxz2 -> +dxz1"],
-            "1 S4+": ["dxz1 -> +dyz2", "dxz2 -> +dyz1"],
-            "1 S4-": ["dxz1 -> -dyz2", "dxz2 -> -dyz1"],
+            "1 S4+": ["dxz1 -> -dyz2", "dxz2 -> -dyz1"],
+            "1 S4-": ["dxz1 -> +dyz2", "dxz2 -> +dyz1"],
             "1 sh": ["dxz1 -> -dxz2", "dxz2 -> -dxz1"],
-            "1 sv'": ["dxz1 -> -dxz1", "dxz2 -> -dxz2"],
-            "1 sv''": ["dxz1 -> +dxz1", "dxz2 -> +dxz2"],
+            "1 sv'": ["dxz1 -> +dxz1", "dxz2 -> +dxz2"],
+            "1 sv''": ["dxz1 -> -dxz1", "dxz2 -> -dxz2"],
             "1 sd'": ["dxz1 -> +dyz1", "dxz2 -> +dyz2"],
             "1 sd''": ["dxz1 -> -dyz1", "dxz2 -> -dyz2"],
         }
         string_transformations["dxz"] = dxz_orbs.copy()
-        dxz_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, +2, -2]
+        dxz_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, +2, -2, 0, 0]
 
         dyz_orbs = {
             "1 E": ["dyz1 -> +dyz1", "dyz2 -> +dyz2"],
             "1 C4_z+": ["dyz1 -> +dxz1", "dyz2 -> +dxz2"],
             "1 C4_z-": ["dyz1 -> -dxz1", "dyz2 -> -dxz2"],
             "1 C2": ["dyz1 -> -dyz1", "dyz2 -> -dyz2"],
-            "1 C2''x": ["dyz1 -> -dyz2", "dyz2 -> -dyz1"],
-            "1 C2''y": ["dyz1 -> +dyz2", "dyz2 -> +dyz1"],
-            "1 C2'''1": ["dyz1 -> +dxz2", "dyz2 -> +dxz1"],
-            "1 C2'''2": ["dyz1 -> -dxz2", "dyz2 -> -dxz1"],
+            "1 C2''x": ["dyz1 -> +dyz2", "dyz2 -> +dyz1"],
+            "1 C2''y": ["dyz1 -> -dyz2", "dyz2 -> -dyz1"],
+            "1 C2'''1": ["dyz1 -> -dxz2", "dyz2 -> -dxz1"],
+            "1 C2'''2": ["dyz1 -> +dxz2", "dyz2 -> +dxz1"],
             "1 i": ["dyz1 -> +dyz2", "dyz2 -> +dyz1"],
-            "1 S4+": ["dyz1 -> -dxz2", "dyz2 -> -dxz1"],
-            "1 S4-": ["dyz1 -> +dxz2", "dyz2 -> +dxz1"],
+            "1 S4+": ["dyz1 -> +dxz2", "dyz2 -> +dxz1"],
+            "1 S4-": ["dyz1 -> -dxz2", "dyz2 -> -dxz1"],
             "1 sh": ["dyz1 -> -dyz2", "dyz2 -> -dyz1"],
-            "1 sv'": ["dyz1 -> +dyz1", "dyz2 -> +dyz1"],
-            "1 sv''": ["dyz1 -> -dyz1", "dyz2 -> -dyz1"],
+            "1 sv'": ["dyz1 -> -dyz1", "dyz2 -> -dyz2"],
+            "1 sv''": ["dyz1 -> +dyz1", "dyz2 -> +dyz2"],
             "1 sd'": ["dyz1 -> +dxz1", "dyz2 -> +dxz2"],
             "1 sd''": ["dyz1 -> -dxz1", "dyz2 -> -dxz2"],
         }
         string_transformations["dyz"] = dyz_orbs.copy()
-        dyz_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, -2, -2, 2, 2]
+        dyz_reducable_basis = [2, 0, 0, -2, 0, 0, 0, 0, 0, 0, 0, 0, -2, +2, 0, 0]
 
         dxxyy_orbs = {
             "1 E": ["dxxyy1 -> +dxxyy1", "dxxyy2 -> +dxxyy2"],
