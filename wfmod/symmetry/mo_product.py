@@ -80,7 +80,7 @@ class MOProduct(SALC):
 
         return summed_terms
 
-    def compute_mo_product(self, mos: list, zero=1e-12):
+    def compute_mo_product(self, mos: list, zero=1e-16):
         """
         Compute the products of molecular orbitals in terms of atomic orbitals.
         Returns a list with products of atomic orbitals given in indices of the
@@ -96,7 +96,8 @@ class MOProduct(SALC):
             values = [val for _, val in combo]
 
             result = np.prod(values)  # multiply all values together
-            if result > zero:
+
+            if np.abs(result) > zero:
                 res.append(indices)
 
         return res
@@ -133,7 +134,6 @@ class MOProduct(SALC):
         """Get the index of an ao basis function in the mo basis."""
         if not isinstance(ao_func, np.ndarray):
             ao_func = np.array(ao_func)
-        print(ao_func)
         idx = int(np.where(ao_func == 1.0)[0])
         return idx
 
@@ -272,8 +272,6 @@ class MOProduct(SALC):
         # to the corresponding mo product to get linear combinations of mo products.
         # pass here all mos that belong to one irrep (e.g. all degenerate mos of one E)
         mo_combinations = self.compute_all_possible_mo_products(same_irrep_mos)
-        print(projected_ao_products)
-        print("mo combinations", mo_combinations)
 
         print("projected ao products", projected_ao_products)
         #  mo_combinations[0] stores the mo combinations (e.g. 4 for 2 mos)
