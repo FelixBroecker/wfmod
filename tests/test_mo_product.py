@@ -50,6 +50,36 @@ def test_get_sign(moProd, a, expected):
         assert np.array_equal(arr_r, arr_e), f"Arrays differ: {arr_r} vs {arr_e}"
 
 
+# test scalar multiplication of a term
+@pytest.mark.parametrize("a,b,expected", [
+   (
+       4,
+        (-1, [np.array([1, 0, 0, 0, 0, 0]), np.array([1, 0, 0, 0, 0, 0])]),
+        (-4, [np.array([1, 0, 0, 0, 0, 0]), np.array([1, 0, 0, 0, 0, 0])])
+    ),
+   (
+       -1,
+       (1, [np.array([1, 0, 0, 0, 0, 0]), np.array([1, 0, 0, 0, 0, 0])]),
+       (-1, [np.array([1, 0, 0, 0, 0, 0]), np.array([1, 0, 0, 0, 0, 0])])
+    ),
+   (
+       0.5,
+       (1, [np.array([1, 0, 0, 0, 0, 0]), np.array([1, 0, 0, 0, 0, 0])]),
+       (0.5, [np.array([1, 0, 0, 0, 0, 0]), np.array([1, 0, 0, 0, 0, 0])])
+    ),
+])
+def test_scalar_multiplication(moProd, a, b, expected):
+    """Test scalar_multiplication method of MOProduct class"""
+
+    result = moProd.scalar_multiplication(a, b)
+    # prefactor is same
+    assert result[0] == expected[0]
+
+    # Compare arrays elementwise
+    for arr_r, arr_e in zip(result[1], expected[1]):
+        assert np.array_equal(arr_r, arr_e), f"Arrays differ: {arr_r} vs {arr_e}"
+
+
 # test summation of two functions
 @pytest.mark.parametrize("a,b,expected", [
    (
