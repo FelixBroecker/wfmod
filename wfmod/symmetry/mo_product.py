@@ -56,6 +56,10 @@ class MOProduct(SALC):
             sign *= arr_sign
         return sign, positive_terms
 
+    def scalar_multiplication(self, scalar: float, term: list[np.ndarray]):
+        """Multiply a term represented as a list of arrays by a scalar."""
+        return [scalar * term[0], term[1]]
+
     def sum_identical_terms(self, terms):
         """Sum identical terms in a list of terms represented as lists of arrays."""
         summed_terms = []
@@ -87,8 +91,10 @@ class MOProduct(SALC):
         MO input list (indice corresponds to AO).
 
         Returns: list of tuples with indices of the MO basis functions.
+                 list of signs corresponding to each tuple.
         """
-        res = []
+        ao_products = []
+        signs = []
 
         # Enumerate over all index combinations
         for combo in itertools.product(*[enumerate(mo) for mo in mos]):
@@ -98,9 +104,10 @@ class MOProduct(SALC):
             result = np.prod(values)  # multiply all values together
 
             if np.abs(result) > zero:
-                res.append(indices)
+                ao_products.append(indices)
+                signs.append(np.sign(result))
 
-        return res
+        return ao_products, signs
 
     def compute_all_possible_mo_products(self, mos: list):
         """
@@ -108,21 +115,24 @@ class MOProduct(SALC):
         e.g. for two mos: mo1 * mo1, mo1 * mo2, mo2 * mo1, mo2 * mo2"""
         product_list = []
         indices = []
+        signs = []
         for i, mo_1 in enumerate(mos):
             for j, mo_2 in enumerate(mos):
-                prod = self.compute_mo_product([mo_1, mo_2])
+                prod, sign = self.compute_mo_product([mo_1, mo_2])
                 idx = (i, j)
                 product_list.append(prod)
                 indices.append(idx)
+                signs.append(sign)
         # remove same lists:
         for i in range(len(product_list)-1, -1, -1):
             for j in range(i-1, -1, -1):
                 if product_list[i] == product_list[j]:
                     del product_list[i]
                     del indices[i]
+                    del signs[i]
                     break
 
-        return product_list, indices
+        return product_list, indices, signs
 
     def get_ao_basis_function_by_idx(self, idx: int) -> np.array:
         """Assign the transformations in ao basis to mo basis."""
@@ -239,7 +249,7 @@ class MOProduct(SALC):
         The sign indicates the sign in the linear combination.
         """
         # compute mo product and get a sum of ao products
-        ao_product_factors = self.compute_mo_product(mo_product)
+        ao_product_factors, signs = self.compute_mo_product(mo_product)
 
         # convert ao indices to ao basis functions
         ao_product_factors_converted = []
@@ -255,8 +265,14 @@ class MOProduct(SALC):
 
         # project each ao product to the target symmetries
         projected_ao_products: list = []
-        for ao_product in ao_product_factors_converted:
-            projected_ao_products += self.get_projection_of_ao_product(ao_product, target_symmetry)
+        for sign, ao_product in zip(signs, ao_product_factors_converted):
+            projection_result = self.get_projection_of_ao_product(ao_product, target_symmetry)
+
+            # if the mo product had a sign, multiply now with sign that has
+            # been excluded before applying the projection operator
+            for j, proj in enumerate(projection_result):
+                projection_result[j] = self.scalar_multiplication(sign, proj)
+            projected_ao_products += projection_result
 
         # sum identical terms from different mo products
         projected_ao_products = self.sum_identical_terms(projected_ao_products)
@@ -284,8 +300,10 @@ class MOProduct(SALC):
         for term in projected_ao_products:
             found = False
             for i, mo_product in enumerate(mo_combinations[0]):
-                for ao_product in mo_product:
+                for j, ao_product in enumerate(mo_product):
                     if ao_product == term[1] and term[0] != 0:
+                        print(mo_combinations[2][i][j])
+                        print(ao_product)
                         mo_assignments.append(int(np.sign(term[0]) * (i+1)))
                         found = True
                         break
