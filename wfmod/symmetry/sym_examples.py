@@ -6,6 +6,11 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 from mo_product import MOProduct
 from salc import SALC
 
+def print_matrix(matrix):
+    for row in matrix:
+        row_str = " ".join(f"{val:3.1f}" for val in row)
+        print(row_str)
+
 if __name__ == "__main__":
     # tests in development stage
     data_set = "c2_tz"
@@ -129,25 +134,27 @@ if __name__ == "__main__":
         print(len(gamess_reference))
         print()
 
+    print("salc class with cartesian =", cartesian, "\n", "point group =", point_group, "\n","orbital basis =", orbital_basis)
+
+
     # test mo products
     moProd = MOProduct(point_group, orbital_basis, cartesian=cartesian)
-    print("mo")
-    _ = moProd.get_transformations_in_mo_basis()
-    ao_1 = np.eye(1, 38, 6).flatten()  # 1px orbital on atom 1 of a linear molecule
+
+    ao_1 = np.eye(1, 38, 5).flatten()  # 1px orbital on atom 1 of a linear molecule
+    ao_1 += np.eye(1, 38, 24).flatten()
     # ao_1 = moProd.get_sign(ao_1)
-    ao_2 = np.eye(1, 38, 5).flatten()
+
+    ao_2 = np.eye(1, 38, 6).flatten()
+    ao_2 += np.eye(1, 38, 25).flatten()
     # ao_2 = moProd.get_sign(ao_2)
-    print("ao_1", ao_1)
-    print("ao_2", ao_2)
-    mo_product = [ao_2, ao_2]
-    same_irrep_mos = [ao_1, ao_2]
+    print("mo 1", mos[5])
+    print("mo 2", mos[11])
+    mo_product = [mos[5], mos[11],]  # mo indices start at 0
+    same_irrep_mos = [mos[5], mos[4], mos[10], mos[11]]  # mo indices start at 0
+    # mo_product = [mos[5], mos[5]]  # mo indices start at 0
+    # same_irrep_mos = [mos[4], mos[5]]  # mo indices start at 0
 
     print("start projection")
-    linear_combination = moProd.get_all_ao_product_projections(mo_product, "A1g", same_irrep_mos)
+    print()
+    linear_combination = moProd.get_all_ao_product_projections(mo_product, "A1g", same_irrep_mos, timings=True)
     print(linear_combination)
-
-    # moProd.assign_ao_products_to_mos(prod, labels, [mos[4], mos[5]])
-
-    # print(len(moProd.mo_basis))
-
-    # test for identical terms in mo product
