@@ -103,11 +103,13 @@ class MOProduct(SALC):
             values = [val for _, val in combo]
 
             result = np.prod(values)  # multiply all values together
-
             if np.abs(result) > zero:
+                # print("indices:", indices)
+                # print("result:", result)
+                # print("sign:", np.sign(result))
+
                 ao_products.append(indices)
                 signs.append(np.sign(result))
-
         return ao_products, signs
 
     def compute_all_possible_mo_products(self, mos: list):
@@ -124,6 +126,8 @@ class MOProduct(SALC):
                 product_list.append(prod)
                 indices.append(idx)
                 signs.append(sign)
+                print(f"Computed mo product for indices {idx}")
+                print(f"Product: {prod}, Sign: {sign}")
         # remove same lists:
         for i in range(len(product_list)-1, -1, -1):
             for j in range(i-1, -1, -1):
@@ -250,6 +254,7 @@ class MOProduct(SALC):
         Return: list of tuples (sign, mo index) that specify the linear combination of mos from the same_irrep_mos input.
         The sign indicates the sign in the linear combination.
         """
+        t_start = time.time()
         t1 = time.time()
 
         # compute mo product and get a sum of ao products
@@ -257,6 +262,7 @@ class MOProduct(SALC):
 
         t2 = time.time()
         t_compute_mo_product = t2 - t1
+        print("t_compute_mo_product:", t_compute_mo_product)
 
         # convert ao indices to ao basis functions
         ao_product_factors_converted = []
@@ -285,9 +291,14 @@ class MOProduct(SALC):
 
         t2 = time.time()
         t_project_ao_products = t2 - t1
+        print("t_project_ao_products:", t_project_ao_products)
 
+        # print("projected_ao_products before sum:", projected_ao_products)
         # sum identical terms from different mo products
+        t1 = time.time()
         projected_ao_products = self.sum_identical_terms(projected_ao_products)
+        t2 = time.time()
+        t_sum_identical_terms = t2 - t1
 
         t1 = time.time()
 
@@ -298,18 +309,27 @@ class MOProduct(SALC):
                 idx = self.get_idx_by_ao_basis_function(ao)
                 tmp.append(idx)
             projected_ao_products[i][1] = tuple(tmp)
+        print("projected_ao_products:", projected_ao_products)
 
         t2 = time.time()
         t_convert_ao_to_idx = t2 - t1
+        print("t_convert_ao_to_idx:", t_convert_ao_to_idx)
 
         t1 = time.time()
         # compare to all combinations from the input mo product and assign terms
         # to the corresponding mo product to get linear combinations of mo products.
         # pass here all mos that belong to one irrep (e.g. all degenerate mos of one E)
         mo_combinations = self.compute_all_possible_mo_products(same_irrep_mos)
+        # print("mo_combinations:", mo_combinations[0][-1])
+        # print("signs:", mo_combinations[2][-1])
+
+        # for i, _ in enumerate(mo_combinations[0]):
+        #     for j, ao_product in enumerate(mo_combinations[0][i]):
+        #         print(f"{i}:{j}:", mo_combinations[2][i][j], ao_product)
 
         t2 = time.time()
         t_compute_all_mo_products = t2 - t1
+        print("t_compute_all_mo_products:", t_compute_all_mo_products)
 
         #  mo_combinations[0] stores the mo combinations (e.g. 4 for 2 mos)
         #  mo_combinations[0][0] stores the tuples of ao indices for the first mo product (e.g. mo1 * mo1)
@@ -318,6 +338,7 @@ class MOProduct(SALC):
         # save the sign and the mo index for each term
         # deduce from that the linear combination of mos
         # use i as index +1 for mo index to distinguish between +0 and -0
+        print("projection results:", projected_ao_products)
         mo_assignments = []
         for term in projected_ao_products:
             found = False
@@ -332,10 +353,12 @@ class MOProduct(SALC):
                         break
                 if found:
                     break
+        # print("mo combinations indices:", mo_combinations[0])
+        print(mo_assignments)
         unique_assignments = list(set(mo_assignments))
-
         t2 = time.time()
         t_assign_ao_products_to_mos = t2 - t1
+        print("t_assign_ao_products_to_mos:", t_assign_ao_products_to_mos)
 
         # return empty list if the result is zero
         if len(unique_assignments) == 1 and unique_assignments[0] == 0:
@@ -346,12 +369,15 @@ class MOProduct(SALC):
         for val in unique_assignments:
             return_format.append((np.sign(val), abs(val)-1))
 
+        t_end = time.time()
         if timings:
             print("Timings for get_all_ao_product_projections:")
             print(f"  {'compute_mo_product':<30}: {t_compute_mo_product:.6f} s")
             print(f"  {'project_ao_products':<30}: {t_project_ao_products:.6f} s")
+            print(f"  {'sum_identical_terms':<30}: {t_sum_identical_terms:.6f} s")
             print(f"  {'convert_ao_to_idx':<30}: {t_convert_ao_to_idx:.6f} s")
             print(f"  {'compute_all_mo_products':<30}: {t_compute_all_mo_products:.6f} s")
             print(f"  {'assign_ao_products_to_mos':<30}: {t_assign_ao_products_to_mos:.6f} s")
+            print(f"  {'total':<30}: {t_end - t_start:.6f} s")
 
         return return_format
